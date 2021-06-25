@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>ABB Web Console</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+</head>
+
+<body>
+
+    <h1>Welcome to the dashboard</h1>
+    <div id="info"></div>
+    <script>
+        fetch('/info').then(response => response.json()).then(data=>{
+            const info=document.getElementById('info');
+            for (const key of Object.keys(data)) 
+                info.innerHTML += `<p><b>${key}</b>: ${data[key]}</p>`;
+        });
+    </script>
+
+</body>
+
+</html>
