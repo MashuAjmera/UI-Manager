@@ -1,7 +1,11 @@
-from flask import Flask
+from flask import Flask, jsonify, render_template
+from dotenv import load_dotenv
+import psutil
+
 from werkzeug import serving
-import ssl
-import sys
+import ssl, os, sys
+
+load_dotenv()  # take environment variables from .env.
 
 HTTPS_ENABLED = True
 VERIFY_USER = True
@@ -14,9 +18,45 @@ API_CA_T = "server_cert.pem"
 
 app = Flask(__name__)
 
+
+@app.route("/info")
+def info():
+    # print(psutil.virtual_memory())
+    return jsonify({
+        'system-version':sys.version,
+        'os-name':os.name,
+        'os-uname':os.uname(),
+        'virtual-memory':psutil.virtual_memory(),
+        'system-platform':sys.platform,
+        'default-encoding':sys.getdefaultencoding(),
+        #Physical cores
+        "Number of physical cores": psutil.cpu_count(logical=False),
+        #Logical cores
+        "Number of logical cores": psutil.cpu_count(logical=True),
+        #Current frequency
+        "Current CPU frequency": psutil.cpu_freq().current,
+        #Min frequency
+        "Min CPU frequency": psutil.cpu_freq().min,
+        #Max frequency
+        "Max CPU frequency": psutil.cpu_freq().max,
+        #System-wide CPU utilization
+        "Current CPU utilization": psutil.cpu_percent(interval=1),
+        #System-wide per-CPU utilization
+        "Current per-CPU utilization": psutil.cpu_percent(interval=1, percpu=True),
+        #Total RAM
+        "Total RAM installed": round(psutil.virtual_memory().total/1000000000, 2),
+        #Available RAM
+        "Available RAM": round(psutil.virtual_memory().available/1000000000, 2),
+        #Used RAM
+        "Used RAM": round(psutil.virtual_memory().used/1000000000, 2),
+        #RAM usage
+        "RAM usage": psutil.virtual_memory().percent,
+    })
+
+
 @app.route("/")
 def main():
-    return "Top-level content"
+    return render_template('dashboard.html')
 
 if __name__ == "__main__":
     context = None
@@ -30,3 +70,4 @@ if __name__ == "__main__":
         except Exception as e:
             sys.exit("Error starting flask server. " + "Missing cert or key. Details: {}".format(e))
     serving.run_simple(API_HOST, API_PORT, app, ssl_context=context)
+    # app.run(host=API_HOST, port=API_PORT)
