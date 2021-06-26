@@ -46,7 +46,7 @@ def setmac():
 def setip():
     dname='enp0s3'
     sudo(f'nmcli device modify {dname} ipv4.address {request.json["ip"]}')
-    return jsonify('IP Address changed successfully!')
+    return jsonify('IP Address added successfully!')
 
 @app.route("/info")
 def info():
@@ -85,7 +85,7 @@ def info():
 
 @app.route("/")
 def main():
-    return render_template('dashboard.html')
+    return render_template('./public/index.html')
 
 if __name__ == "__main__":
     # context = None
