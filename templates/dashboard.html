@@ -9,13 +9,52 @@
 <body>
 
     <h1>Welcome to the dashboard</h1>
+
+    <div id="notif"></div>
     <div id="info"></div>
+    <div>Your device MAC address is: <span id="mac"></span><button onclick="setmac()">Change</button>
+    </div>
+    <div>Your network IP address is: <span id="ip"></span><button onclick="setip()">Change</button></div>
     <script>
-        fetch('/info').then(response => response.json()).then(data=>{
-            const info=document.getElementById('info');
-            for (const key of Object.keys(data)) 
+        notif = document.getElementById('notif');
+
+        fetch('/info').then(response => response.json()).then(data => {
+            const info = document.getElementById('info');
+            for (const key of Object.keys(data))
                 info.innerHTML += `<p><b>${key}</b>: ${data[key]}</p>`;
         });
+
+        function getmac() { fetch('/getmac').then(response => response.json()).then(data => document.getElementById('mac').innerHTML = data) }
+        function getip() { fetch('/getip').then(response => response.json()).then(data => document.getElementById('ip').innerHTML = data) }
+
+        function setmac() {
+            // mac='08:00:27:ec:c0:c9'
+            notif.innerHTML = "";
+            fetch('/setmac', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mac: '08:01:27:ec:c0:c9' })
+            }).then(response => response.json())
+                .then(data => {
+                    notif.innerHTML = data;
+                }).then(() => getmac());
+        };
+
+        function setip() {
+            // ip='192.168.29.201'
+            notif.innerHTML = "";
+            fetch('/setip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ip: '192.168.29.200' })
+            }).then(response => response.json())
+                .then(data => {
+                    notif.innerHTML = data;
+                }).then(() => getip());
+        };
+
+        function init() { getmac(); getip() };
+        window.addEventListener("load", init, true);
     </script>
 
 </body>

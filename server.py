@@ -1,9 +1,9 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from dotenv import load_dotenv
 import psutil
 
 from werkzeug import serving
-import ssl, os, sys
+import ssl, os, sys, subprocess, json
 
 load_dotenv()  # take environment variables from .env.
 
@@ -18,6 +18,35 @@ API_CA_T = "server_cert.pem"
 
 app = Flask(__name__)
 
+def sudo(cmd):
+    pwd = '12345678'
+    subprocess.run('echo {} | sudo -S {}'.format(pwd,cmd),shell=True)
+
+@app.route('/getmac')
+def getmac():
+    x = subprocess.run('ip -j link', capture_output=True, shell=True)
+    j=x.stdout.decode()
+    y=json.loads(j)
+    return jsonify(y[1]['address'])
+
+@app.route('/getip')
+def getip():
+    x = subprocess.run('hostname -I', capture_output=True, shell=True)
+    return jsonify(x.stdout.decode())
+
+@app.route('/setmac',methods=['POST'])
+def setmac():
+    dname='enp0s3'
+    sudo(f'ip link set dev {dname} down')
+    sudo(f'ip link set dev {dname} address {request.json["mac"]}')
+    sudo(f'ip link set dev {dname} up')
+    return jsonify('MAC Address changed successfully!')
+
+@app.route('/setip',methods=['POST'])
+def setip():
+    dname='enp0s3'
+    sudo(f'nmcli device modify {dname} ipv4.address {request.json["ip"]}')
+    return jsonify('IP Address changed successfully!')
 
 @app.route("/info")
 def info():
@@ -59,15 +88,15 @@ def main():
     return render_template('dashboard.html')
 
 if __name__ == "__main__":
-    context = None
-    if HTTPS_ENABLED:
-        context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-        if VERIFY_USER:
-            context.verify_mode = ssl.CERT_REQUIRED
-            context.load_verify_locations(API_CA_T)
-        try:
-            context.load_cert_chain(API_CRT, API_KEY)
-        except Exception as e:
-            sys.exit("Error starting flask server. " + "Missing cert or key. Details: {}".format(e))
-    serving.run_simple(API_HOST, API_PORT, app, ssl_context=context)
-    # app.run(host=API_HOST, port=API_PORT)
+    # context = None
+    # if HTTPS_ENABLED:
+    #     context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+    #     if VERIFY_USER:
+    #         context.verify_mode = ssl.CERT_REQUIRED
+    #         context.load_verify_locations(API_CA_T)
+    #     try:
+    #         context.load_cert_chain(API_CRT, API_KEY)
+    #     except Exception as e:
+    #         sys.exit("Error starting flask server. " + "Missing cert or key. Details: {}".format(e))
+    # serving.run_simple(API_HOST, API_PORT, app, ssl_context=context)
+    app.run(host=API_HOST, port=API_PORT)
