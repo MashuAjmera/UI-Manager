@@ -8,19 +8,19 @@ export default class App extends Component {
   state = { notif: null, info: null };
 
   componentDidMount() {
-    fetch('/info').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, ...data } }));
+    fetch('/api/info').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, ...data } }));
     this.getmac();
     this.getip();
   }
 
-  getmac = () => { fetch('/getmac').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, "MAC Address": data } })) }
+  getmac = () => { fetch('/api/getmac').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, "MAC Address": data } })) }
 
-  getip = () => { fetch('/getip').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, "IP Address": data } })) }
+  getip = () => { fetch('/api/getip').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, "IP Address": data } })) }
 
   setmac = () => {
     // mac='08:00:27:ec:c0:c9'
     this.setState({ notif: null });
-    fetch('/setmac', {
+    fetch('/api/setmac', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mac: '08:01:27:ec:c0:c9' })
@@ -32,7 +32,7 @@ export default class App extends Component {
   setip = () => {
     // ip='192.168.29.201'
     this.setState({ notif: null });
-    fetch('/setip', {
+    fetch('/api/setip', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ip: '192.168.29.200' })

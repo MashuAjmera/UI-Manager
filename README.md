@@ -1,4 +1,5 @@
-# Getting Started with Create React App
+# UI-Manager
+Manage the Linux system through a web console.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
