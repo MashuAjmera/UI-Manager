@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { Layout, Button, Table, Typography, message } from 'antd';
+import { Layout, Button, Table, Typography, message, Skeleton } from 'antd';
 import 'antd/dist/antd.css';
 
 export default class Overview extends Component {
-  state = { info: null };
+  state = { info: null, loading:true };
 
   componentDidMount() {
-    fetch('/api/info').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, ...data } }));
+    fetch('/api/info').then(response => response.json()).then(data => this.setState({ info: { ...this.state.info, ...data },loading:false }));
     this.getmac();
     this.getip();
   }
@@ -64,8 +64,10 @@ export default class Overview extends Component {
                 <Title>Welcome to the dashboard!</Title>
                 <Button type="primary" onClick={this.setmac}>Change MAC</Button>
                 <Button type="primary" style={{ marginLeft: 8 }} onClick={this.setip}>Change IP</Button>
+                <Skeleton loading={this.state.loading} active title={{width:'100%'}} paragraph={{ rows: 10, width:'100%' }}>
+                  {this.state.info && <Table columns={columns} dataSource={Object.entries(this.state.info)} style={{marginTop: 30}}/>}
+                </Skeleton>
               </div>
-              {this.state.info && <Table columns={columns} dataSource={Object.entries(this.state.info)} />}
             </Content>
     );
   }
