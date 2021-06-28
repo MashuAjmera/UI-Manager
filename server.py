@@ -87,7 +87,7 @@ def info():
 def uploader():
     if request.method=='POST':
         f = request.files['file']
-        f.save(os.path.join(os.environ.get("FLASK_ENV"), secure_filename(f.filename)))
+        f.save(os.path.join(os.environ.get("FLASK_UPLOAD_FOLDER"), secure_filename(f.filename)))
         return "Uploaded successfully!"
 
 @app.route('/', defaults={'path': ''})
