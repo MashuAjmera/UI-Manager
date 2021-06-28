@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Layout, Button, PageHeader } from 'antd';
-import 'antd/dist/antd.css';
 import { UserAddOutlined } from '@ant-design/icons';
 
 export default class Accounts extends Component {

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Layout, Button, Table, Typography, message, Skeleton } from 'antd';
-import 'antd/dist/antd.css';
 
 export default class Overview extends Component {
   state = { info: null, loading:true };

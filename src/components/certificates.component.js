@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Layout, Typography, Upload, message, Button } from 'antd';
-import 'antd/dist/antd.css';
 import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 export default class Certificates extends Component {
