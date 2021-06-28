@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Layout, Menu } from 'antd';
 import {
   AppstoreOutlined,
@@ -12,7 +13,7 @@ import {
 } from '@ant-design/icons';
 
 export default function Nav(props) {
-    const { Sider } = Layout;
+    const { Sider,Footer } = Layout;
     return(
     <Sider
         style={{
@@ -23,15 +24,16 @@ export default function Nav(props) {
         }}
     >
         <div className="logo" />
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
-            <Menu.Item key="1" icon={<UserOutlined />}>
-                Overview
+        {console.log(props.match.path)}
+        <Menu theme="dark" mode="inline" selectedKeys={["/"]}>
+            <Menu.Item key="/" icon={<UserOutlined />}>
+                <Link to="/">Overview</Link>
             </Menu.Item>
             <Menu.Item key="2" icon={<VideoCameraOutlined />}>
                 Accounts
             </Menu.Item>
-            <Menu.Item key="3" icon={<UploadOutlined />}>
-                Certificates
+            <Menu.Item key="/certificates" icon={<UploadOutlined />}>
+                <Link to="/certificates">Certificates</Link>
             </Menu.Item>
             <Menu.Item key="4" icon={<BarChartOutlined />}>
                 Configuration
@@ -49,5 +51,6 @@ export default function Nav(props) {
                 Networking
             </Menu.Item>
         </Menu>
+            <Footer style={{position: 'fixed',bottom:0, background: 'none', color: 'rgba(255,255,255,0.55)', paddingLeft:24}}>© 2021 ABB Ltd.</Footer>
     </Sider>);
 }
