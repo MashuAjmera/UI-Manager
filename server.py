@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import psutil
 
 from werkzeug import serving
+from werkzeug.utils import secure_filename
 import ssl, os, sys, subprocess, json
 
 load_dotenv()  # take environment variables from .env.
@@ -82,6 +83,12 @@ def info():
         "RAM usage": psutil.virtual_memory().percent,
     })
 
+@app.route("/api/uploader" , methods=['POST'])
+def uploader():
+    if request.method=='POST':
+        f = request.files['file']
+        f.save(os.path.join(os.environ.get("FLASK_ENV"), secure_filename(f.filename)))
+        return "Uploaded successfully!"
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
