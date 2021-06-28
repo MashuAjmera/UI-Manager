@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Nav from "./components/nav.component.js"
 import Overview from "./components/overview.component.js"
+import Accounts from "./components/accounts.component.js"
 import Certificates from "./components/certificates.component.js"
 import { Layout } from 'antd';
 import logo from './static/logo.png';
@@ -22,6 +23,7 @@ export default class App extends Component {
             <Switch>
               <Route path="/" exact component={Overview} />
               <Route path="/certificates" component={Certificates} />
+              <Route path="/accounts" component={Accounts} />
             </Switch>
           </Layout>
         </Layout>

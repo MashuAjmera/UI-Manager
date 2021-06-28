@@ -27,13 +27,13 @@ export default class Nav extends Component {
             <div className="logo" />
             <Menu theme="dark" mode="inline" defaultSelectedKeys={[window.location.pathname]}>
                 <Menu.Item key="/" icon={<UserOutlined />}>
-                    <span>Overview</span><Link to="/"/>
+                    <Link to="/">Overview</Link>
                 </Menu.Item>
-                <Menu.Item key="2" icon={<VideoCameraOutlined />}>
-                    Accounts
+                <Menu.Item key="/accounts" icon={<VideoCameraOutlined />}>
+                    <Link to="/accounts">Accounts</Link>
                 </Menu.Item>
                 <Menu.Item key="/certificates" icon={<UploadOutlined />}>
-                    <span>Certificates</span><Link to="/certificates"/>
+                    <Link to="/certificates">Certificates</Link>
                 </Menu.Item>
                 <Menu.Item key="4" icon={<BarChartOutlined />}>
                     Configuration
