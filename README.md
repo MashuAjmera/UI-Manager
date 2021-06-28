@@ -1,7 +1,12 @@
 # UI-Manager
 Manage the Linux system through a web console.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Features
+
+- This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+- Flask is used as the backend.
+- Ant Design helps with design templates.
+- User is authenticated using Client certificates with mutual-TLS (mTLS)
 
 ## Available Scripts
 
