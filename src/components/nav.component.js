@@ -11,12 +11,14 @@ import {
   UploadOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons';
+import logo from '../static/favicon.png';
 
 export default class Nav extends Component {
     render(){
         const { Sider, Footer } = Layout;
         return(
         <Sider
+        theme="dark"
             style={{
                 overflow: 'auto',
                 height: '100vh',
@@ -24,7 +26,7 @@ export default class Nav extends Component {
                 left: 0,
             }}
         >
-            <div className="logo" />
+            <div className="logo" ><img src={logo} alt="ABB Logo" style={{ maxWidth: '90%' }} /></div>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={[window.location.pathname]}>
                 <Menu.Item key="/" icon={<UserOutlined />}>
                     <Link to="/">Overview</Link>
@@ -51,7 +53,7 @@ export default class Nav extends Component {
                     Networking
                 </Menu.Item>
             </Menu>
-                <Footer style={{position: 'fixed',bottom:0, background: 'none', color: 'rgba(255,255,255,0.55)', paddingLeft:24}}>© 2021 ABB Ltd.</Footer>
+                <Footer style={{position: 'fixed',bottom:0, background: 'none', paddingLeft:24}}>© 2021 ABB Ltd.</Footer>
         </Sider>
         );
     }

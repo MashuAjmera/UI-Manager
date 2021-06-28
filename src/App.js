@@ -6,7 +6,8 @@ import Accounts from "./components/accounts.component.js"
 import Certificates from "./components/certificates.component.js"
 import { Layout } from 'antd';
 import logo from './static/logo.png';
-import 'antd/dist/antd.css';
+// import 'antd/dist/antd.css';
+import './static/antd.css';
 
 export default class App extends Component {
   render() {
@@ -15,10 +16,10 @@ export default class App extends Component {
     return (
       <BrowserRouter>
         <Layout>
-          <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
+          {/* <Header style={{ position: 'fixed', zIndex: 1, width: '100%' }}>
             <div className="logo" ><img src={logo} alt="ABB Logo" style={{ maxHeight: "50px" }} /></div>
-          </Header>
-          <Layout className="site-layout" style={{ marginLeft: 200, marginTop: 64 }}>
+          </Header> */}
+          <Layout className="site-layout" style={{marginLeft: 200, paddingBottom: 100 }}>
             <Nav />
             <Switch>
               <Route path="/" exact component={Overview} />
