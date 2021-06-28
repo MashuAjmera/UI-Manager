@@ -1,9 +1,13 @@
 import React, { Component } from "react";
 import { Layout, Typography, Upload, message, Button } from 'antd';
 import 'antd/dist/antd.css';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 export default class Certificates extends Component {
+  handleDownload=()=>{
+    fetch('/api/downloader').then((data)=>console.log(data));
+  }
+
   render() {
 
     const { Title } = Typography;
@@ -38,8 +42,9 @@ export default class Certificates extends Component {
         <div className="site-layout-background" style={{ padding: 24, textAlign: 'center' }}>
           <Title>Welcome to the Certification!</Title>
           <Upload {...props}>
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+            <Button icon={<UploadOutlined />}>Upload Certificate</Button>
           </Upload>
+          <Button icon={<DownloadOutlined />} href='http://localhost:5000/api/downloader' download>Download Certificate</Button>
         </div>
       </Content>
     );

@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request, send_from_directory, send_file
 from dotenv import load_dotenv
 import psutil
 
@@ -85,10 +85,13 @@ def info():
 
 @app.route("/api/uploader" , methods=['POST'])
 def uploader():
-    if request.method=='POST':
-        f = request.files['file']
-        f.save(os.path.join(os.environ.get("FLASK_UPLOAD_FOLDER"), secure_filename(f.filename)))
-        return "Uploaded successfully!"
+    f = request.files['file']
+    f.save(os.path.join(os.environ.get("FLASK_UPLOAD_FOLDER"), secure_filename(f.filename)))
+    return "Uploaded successfully!"
+
+@app.route("/api/downloader")
+def downloader():
+    return send_file('/home/mashu/ABB/alice.p12',as_attachment=True)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
