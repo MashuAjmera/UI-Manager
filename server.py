@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, render_template, request, send_from_directory, send_file
 from dotenv import load_dotenv
-import psutil
 
 from werkzeug import serving
 from werkzeug.utils import secure_filename
@@ -32,7 +31,7 @@ def getmac():
 
 @app.route('/api/getip')
 def getip():
-    x = subprocess.run('hostname -I', capture_output=True, shell=True)
+    x = subprocess.run('hostname -i', capture_output=True, shell=True)
     return jsonify(x.stdout.decode())
 
 @app.route('/api/setmac',methods=['POST'])
@@ -56,31 +55,8 @@ def info():
         'system-version':sys.version,
         'os-name':os.name,
         'os-uname':os.uname(),
-        'virtual-memory':psutil.virtual_memory(),
         'system-platform':sys.platform,
         'default-encoding':sys.getdefaultencoding(),
-        #Physical cores
-        "Number of physical cores": psutil.cpu_count(logical=False),
-        #Logical cores
-        "Number of logical cores": psutil.cpu_count(logical=True),
-        #Current frequency
-        "Current CPU frequency": psutil.cpu_freq().current,
-        #Min frequency
-        "Min CPU frequency": psutil.cpu_freq().min,
-        #Max frequency
-        "Max CPU frequency": psutil.cpu_freq().max,
-        #System-wide CPU utilization
-        "Current CPU utilization": psutil.cpu_percent(interval=1),
-        #System-wide per-CPU utilization
-        "Current per-CPU utilization": psutil.cpu_percent(interval=1, percpu=True),
-        #Total RAM
-        "Total RAM installed": round(psutil.virtual_memory().total/1000000000, 2),
-        #Available RAM
-        "Available RAM": round(psutil.virtual_memory().available/1000000000, 2),
-        #Used RAM
-        "Used RAM": round(psutil.virtual_memory().used/1000000000, 2),
-        #RAM usage
-        "RAM usage": psutil.virtual_memory().percent,
     })
 
 @app.route("/api/uploader" , methods=['POST'])
