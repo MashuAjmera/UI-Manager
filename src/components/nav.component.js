@@ -53,7 +53,7 @@ export default class Nav extends Component {
                     Networking
                 </Menu.Item>
             </Menu>
-                <Footer style={{position: 'fixed',bottom:0, background: 'none', paddingLeft:24}}>© 2021 ABB Ltd.</Footer>
+                <Footer style={{position: 'fixed',bottom:0, background: 'none', paddingLeft:24, color:'#cccccc'}}>© 2021 ABB Ltd.</Footer>
         </Sider>
         );
     }

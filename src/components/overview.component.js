@@ -23,7 +23,7 @@ export default class Overview extends Component {
     }).then(response => response.json())
       .then(data => message.success(data))
       .then(() => this.getmac())
-      .catch(err=>message.error(err));
+      .catch(err=>message.warning(err));
   };
 
   setip = () => {
@@ -35,7 +35,7 @@ export default class Overview extends Component {
     }).then(response => response.json())
       .then(data => message.success(data))
       .then(() => this.getip())
-      .catch(err=>message.error(err));
+      .catch(err=>message.warning(err));
   };
 
   render() {
