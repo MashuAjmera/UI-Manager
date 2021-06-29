@@ -1,7 +1,11 @@
-FROM python:alpine3.8
+FROM node:12.18.0-alpine as build
 COPY . /app
 WORKDIR /app
-RUN pip install -r requirements.txt
-EXPOSE 5001
-ENTRYPOINT [ "python" ]
+RUN npm ci
+RUN npm run build
+RUN apk add python3
+RUN apk add py3-pip
+RUN pip3 install -r requirements.txt
+EXPOSE 5000
+ENTRYPOINT [ "python3" ]
 CMD [ "server.py" ]
