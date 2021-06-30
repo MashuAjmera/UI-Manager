@@ -1,49 +1,47 @@
-from flask import Flask, jsonify, render_template, request, send_from_directory, send_file
+from flask import Flask, jsonify, request, send_from_directory, send_file
 from dotenv import load_dotenv
+from flask_mqtt import Mqtt
 
 from werkzeug import serving
 from werkzeug.utils import secure_filename
-import ssl, os, sys, subprocess, json
-
+import ssl, os, sys, subprocess, json, time
 load_dotenv()  # take environment variables from .env.
+
+app = Flask(__name__,static_folder='build')
+# from api.mqtt import mqtt
+# app.register_blueprint(mqtt,url_prefix='/api/mqtt')
+from api.network import network
+app.register_blueprint(network,url_prefix='/api/network')
+
+app.config['MQTT_BROKER_URL'] = '0.0.0.0'
+app.config['MQTT_BROKER_PORT'] = 1883
+# app.config['MQTT_USERNAME'] = 'user'
+# app.config['MQTT_PASSWORD'] = 'secret'
+app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
+mqtt = Mqtt(app)
+
+@mqtt.on_connect()
+def handle_connect(client, userdata, flags, rc):
+    mqtt.subscribe('uimanager/influxdb')
+
+@mqtt.on_message()
+def handle_mqtt_message(client, userdata, message):
+    print(f'message received {message.topic}')
+
+@app.route("/api/publish")
+def handle_publish():
+    topic="uimanager/influxdb"
+    result = mqtt.publish(topic, "message")
+    status = result[0]
+    if status == 0:
+        return f"Sending to {topic} successful."
+    else:
+        return f"Failed to send message to topic {topic}."
 
 HTTPS_ENABLED = True
 VERIFY_USER = True
-
 API_HOST = "0.0.0.0"
 API_PORT = 5000
-
-app = Flask(__name__,static_folder='build')
-
-def sudo(cmd):
-    pwd = '12345678'
-    subprocess.run('echo {} | sudo -S {}'.format(pwd,cmd),shell=True)
-
-@app.route('/api/getmac')
-def getmac():
-    x = subprocess.run('ip -j link', capture_output=True, shell=True)
-    j=x.stdout.decode()
-    y=json.loads(j)
-    return jsonify(y[1]['address'])
-
-@app.route('/api/getip')
-def getip():
-    x = subprocess.run('hostname -i', capture_output=True, shell=True)
-    return jsonify(x.stdout.decode())
-
-@app.route('/api/setmac',methods=['POST'])
-def setmac():
-    dname='enp0s3'
-    sudo(f'ip link set dev {dname} down')
-    sudo(f'ip link set dev {dname} address {request.json["mac"]}')
-    sudo(f'ip link set dev {dname} up')
-    return jsonify('MAC Address changed successfully!')
-
-@app.route('/api/setip',methods=['POST'])
-def setip():
-    dname='enp0s3'
-    sudo(f'nmcli device modify {dname} ipv4.address {request.json["ip"]}')
-    return jsonify('IP Address added successfully!')
 
 @app.route("/api/info")
 def info():
@@ -66,14 +64,14 @@ def uploader():
 def downloader():
     return send_file(os.path.join(os.environ.get("API_DOWNLOAD_FOLDER"), 'alice.p12'),as_attachment=True)
 
-# @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
-# def serve(path):
-#     if os.environ.get("FLASK_ENV")!='development':
-#         if path != "" and os.path.exists(app.static_folder + '/' + path):
-#             return send_from_directory(app.static_folder, path)
-#         else:
-#             return send_from_directory(app.static_folder, 'index.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if os.environ.get("FLASK_ENV")!='development':
+        if path != "" and os.path.exists(app.static_folder + '/' + path):
+            return send_from_directory(app.static_folder, path)
+        else:
+            return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == "__main__":
     context = None

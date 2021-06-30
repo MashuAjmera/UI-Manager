@@ -3,8 +3,8 @@ import { Layout, Typography, Upload, message, Button } from 'antd';
 import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 export default class Certificates extends Component {
-  handleDownload=()=>{
-    fetch('/api/downloader').then((data)=>console.log(data));
+  handlePublish=()=>{
+    fetch('/api/publish').then((response)=>{if(response.status===200){message.success('message sent successfully')}}).catch(error=>message.warning(error));
   }
 
   render() {
@@ -44,6 +44,7 @@ export default class Certificates extends Component {
             <Button icon={<UploadOutlined />}>Upload Certificate</Button>
           </Upload>
           <Button icon={<DownloadOutlined />} href='http://localhost:5000/api/downloader' download>Download Certificate</Button>
+          <Button icon={<DownloadOutlined />} onClick={this.handlePublish}>Publish</Button>
         </div>
       </Content>
     );
