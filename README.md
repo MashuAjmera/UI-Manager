@@ -8,6 +8,25 @@ Manage the Linux system through a web console.
 - Ant Design helps with design templates.
 - User is authenticated using Client certificates with mutual-TLS (mTLS)
 
+## Installation Procedure
+- Install the docker image using `sudo docker run -d -p 443:5000 mashuajmera/uimanager`
+- Install the following environment variables:
+
+```
+FLASK_UPLOAD=
+API_CRT= location of the server certificate
+API_UPLOAD_FOLDER=location of the folder to save uploaded file
+API_DOWNLOAD_FOLDER=location of the folder from which to download file
+API_KEY= location of the key of server certificate
+API_CA= location of the CA certificate
+```
+
+## Development Procedure
+- Clone the github repository in you local computer
+- Mention all the env variables along with `FLASK_ENV=development`
+- Make all the changes in your forked repository
+- Send a pull request
+
 ## Available Scripts
 
 In the project directory, you can run:
