@@ -1,4 +1,5 @@
 from paho.mqtt import client as mqtt_client
+import random 
 
 broker = 'localhost'
 port = 1883
@@ -9,4 +10,9 @@ client.connect(broker, port)
 
 
 def publish(msg,topic):
-    return client.publish(topic, msg)
+    result=client.publish(topic, msg)
+    status = result[0]
+    if status == 0:
+        return f"Send `{msg}` to topic `{topic}`"
+    else:
+        return f"Failed to send message to topic {topic}"
