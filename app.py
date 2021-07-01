@@ -8,15 +8,13 @@ import ssl, os, sys, subprocess, json, time
 load_dotenv()  # take environment variables from .env.
 
 app = Flask(__name__,static_folder='build')
-# from api.mqtt import mqtt
-# app.register_blueprint(mqtt,url_prefix='/api/mqtt')
 from api.network import network
 app.register_blueprint(network,url_prefix='/api/network')
 
 app.config['MQTT_BROKER_URL'] = '0.0.0.0'
 app.config['MQTT_BROKER_PORT'] = 1883
-# app.config['MQTT_USERNAME'] = 'user'
-# app.config['MQTT_PASSWORD'] = 'secret'
+app.config['MQTT_USERNAME'] = 'user'
+app.config['MQTT_PASSWORD'] = 'secret'
 app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
 mqtt = Mqtt(app)
 
