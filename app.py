@@ -13,8 +13,6 @@ app.register_blueprint(network,url_prefix='/api/network')
 
 app.config['MQTT_BROKER_URL'] = '0.0.0.0'
 app.config['MQTT_BROKER_PORT'] = 1883
-app.config['MQTT_USERNAME'] = 'user'
-app.config['MQTT_PASSWORD'] = 'secret'
 app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
 mqtt = Mqtt(app)
 
