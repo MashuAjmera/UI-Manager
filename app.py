@@ -10,29 +10,8 @@ load_dotenv()  # take environment variables from .env.
 app = Flask(__name__,static_folder='build')
 from api.network import network
 app.register_blueprint(network,url_prefix='/api/network')
-
-app.config['MQTT_BROKER_URL'] = '0.0.0.0'
-app.config['MQTT_BROKER_PORT'] = 1883
-app.config['MQTT_REFRESH_TIME'] = 1.0  # refresh time in seconds
-mqtt = Mqtt(app)
-
-@mqtt.on_connect()
-def handle_connect(client, userdata, flags, rc):
-    mqtt.subscribe('uimanager/influxdb')
-
-@mqtt.on_message()
-def handle_mqtt_message(client, userdata, message):
-    print(f'message received {message.topic}')
-
-@app.route("/api/publish")
-def handle_publish():
-    topic="uimanager/influxdb"
-    result = mqtt.publish(topic, "message")
-    status = result[0]
-    if status == 0:
-        return f"Sending to {topic} successful."
-    else:
-        return f"Failed to send message to topic {topic}."
+from api.db import db
+app.register_blueprint(db,url_prefix='/api/db')
 
 HTTPS_ENABLED = True
 VERIFY_USER = True
