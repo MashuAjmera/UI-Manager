@@ -7,13 +7,13 @@ Manage the Linux system through a web console.
 - Flask is used as the backend.
 - Ant Design helps with design templates.
 - User is authenticated using Client certificates with mutual-TLS (mTLS)
+- Communication with other PORTS using MQTT
 
 ## Installation Procedure
 - Install the docker image using `sudo docker run -d -p 443:5000 mashuajmera/uimanager`
 - Install the following environment variables:
 
 ```
-FLASK_UPLOAD=
 API_CRT= location of the server certificate
 API_UPLOAD_FOLDER=location of the folder to save uploaded file
 API_DOWNLOAD_FOLDER=location of the folder from which to download file
@@ -24,6 +24,10 @@ API_CA= location of the CA certificate
 ## Development Procedure
 - Clone the github repository in you local computer
 - Mention all the env variables along with `FLASK_ENV=development`
+- install puthon3, pip3, nodejs, npm.
+- perform `npm ci` to install frontend dependencies
+- perform `pip install -r requirements` to install backend dependencies
+- start the backend server using `flask run`
 - Make all the changes in your forked repository
 - Send a pull request
 
