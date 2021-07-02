@@ -2,18 +2,22 @@ import React, {Component} from "react";
 import {Link } from "react-router-dom";
 import { Layout, Menu } from 'antd';
 import {
-  AppstoreOutlined,
-  BarChartOutlined,
-  CloudOutlined,
-  ShopOutlined,
-  TeamOutlined,
-  UserOutlined,
-  UploadOutlined,
-  VideoCameraOutlined,
+    SafetyCertificateOutlined,
+    ControlOutlined,
+    ApartmentOutlined,
+    MonitorOutlined,
+    HomeOutlined,
 } from '@ant-design/icons';
 import logo from '../static/favicon.png';
 
 export default class Nav extends Component {
+    state={menu:null,submenu:null};
+
+    componentDidMount(){
+        let y=window.location.pathname.split('/');
+        this.setState({menu:y[1]});
+    }
+
     render(){
         const { Sider, Footer } = Layout;
         return(
@@ -27,32 +31,26 @@ export default class Nav extends Component {
             }}
         >
             <div className="logo" ><img src={logo} alt="ABB Logo" style={{ maxWidth: '90%' }} /></div>
-            <Menu theme="dark" mode="inline" defaultSelectedKeys={[window.location.pathname]}>
-                <Menu.Item key="/" icon={<UserOutlined />}>
+            {this.state.menu&&<Menu theme="dark" mode="inline" defaultSelectedKeys={[this.state.menu]}
+          defaultOpenKeys={['configuration']} >
+                <Menu.Item key="/" icon={<HomeOutlined />}>
                     <Link to="/">Overview</Link>
                 </Menu.Item>
-                <Menu.Item key="/accounts" icon={<VideoCameraOutlined />}>
-                    <Link to="/accounts">Accounts</Link>
-                </Menu.Item>
-                <Menu.Item key="/certificates" icon={<UploadOutlined />}>
+                <Menu.Item key="certificates" icon={<SafetyCertificateOutlined />}>
                     <Link to="/certificates">Certificates</Link>
                 </Menu.Item>
-                <Menu.Item key="4" icon={<BarChartOutlined />}>
-                    Configuration
+                <Menu.SubMenu key="configuration" icon={<ControlOutlined />} title="Configuration">
+            <Menu.Item key="hardware">Hardware</Menu.Item>
+            <Menu.Item key="software"><Link to="/software">Software</Link></Menu.Item>
+            <Menu.Item key="network">Network</Menu.Item>
+          </Menu.SubMenu>
+                <Menu.Item key="diagnostics" icon={<ApartmentOutlined />}>
+                    <Link to="/diagnostics">Diagnostics</Link>
                 </Menu.Item>
-                <Menu.Item key="5" icon={<CloudOutlined />}>
-                    Diagnostics
+                <Menu.Item key="monitoring" icon={<MonitorOutlined />}>
+                    <Link to="/monitoring">Monitoring</Link>
                 </Menu.Item>
-                <Menu.Item key="6" icon={<AppstoreOutlined />}>
-                    Information
-                </Menu.Item>
-                <Menu.Item key="7" icon={<TeamOutlined />}>
-                    Licenses
-                </Menu.Item>
-                <Menu.Item key="8" icon={<ShopOutlined />}>
-                    Networking
-                </Menu.Item>
-            </Menu>
+            </Menu>}
                 <Footer style={{position: 'fixed',bottom:0, background: 'none', paddingLeft:24, color:'#cccccc'}}>© 2021 ABB Ltd.</Footer>
         </Sider>
         );
