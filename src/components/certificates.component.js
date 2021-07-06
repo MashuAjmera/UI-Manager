@@ -1,20 +1,10 @@
 import React, { Component } from "react";
-import { Layout, Typography, Upload, message, Button } from 'antd';
+import { Layout, Upload, message, Button, PageHeader } from 'antd';
 import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 export default class Certificates extends Component {
-  handlePublish=()=>{
-    var key="updatable";
-    message.loading({content:"Sending request...",key,duration:10});
-    fetch('/api/db/retention')
-      .then(response=>response.json())
-      .then((data)=>message.success({content:data,key}))
-      .catch(error=>message.warning({content:error,key}));
-  }
-
   render() {
 
-    const { Title } = Typography;
     const { Content } = Layout;
 
     const props = {
@@ -42,16 +32,23 @@ export default class Certificates extends Component {
     };
 
     return (
+      <Layout className="site-layout">
+        <PageHeader
+          ghost={false}
+          onBack={() => window.history.back()}
+          title="Certificate Authority"
+          extra={[
+            <Upload {...props}>
+              <Button icon={<UploadOutlined />}>Upload Certificate</Button>
+            </Upload>
+          ]}
+        ></PageHeader>
       <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
         <div className="site-layout-background" style={{ padding: 24, textAlign: 'center' }}>
-          <Title>Welcome to the Certification!</Title>
-          <Upload {...props}>
-            <Button icon={<UploadOutlined />}>Upload Certificate</Button>
-          </Upload>
           <Button icon={<DownloadOutlined />} href='http://localhost:5000/api/downloader' download>Download Certificate</Button>
-          <Button icon={<DownloadOutlined />} onClick={this.handlePublish}>Publish</Button>
         </div>
       </Content>
+      </Layout>
     );
   }
 }

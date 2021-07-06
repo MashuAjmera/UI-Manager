@@ -15,7 +15,7 @@ export default class Nav extends Component {
 
     componentDidMount(){
         let y=window.location.pathname.split('/');
-        this.setState({menu:y});
+        this.setState({menu:y},()=>{if(y[1]==='software'){this.setState({submenu:"configuration"})}});
     }
 
     render(){
@@ -32,7 +32,7 @@ export default class Nav extends Component {
         >
             <div className="logo" ><img src={logo} alt="ABB Logo" style={{ maxWidth: '90%' }} /></div>
             {this.state.menu&&<Menu theme="dark" mode="inline" defaultSelectedKeys={[this.state.menu[1]]}
-          defaultOpenKeys={['configuration']} >
+          defaultOpenKeys={[this.state.submenu]} >
                 <Menu.Item key="" icon={<HomeOutlined />}>
                     <Link to="/">Overview</Link>
                 </Menu.Item>
