@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, send_from_directory, send_file
 from dotenv import load_dotenv
-from flask_mqtt import Mqtt
 
 from werkzeug import serving
 from werkzeug.utils import secure_filename
