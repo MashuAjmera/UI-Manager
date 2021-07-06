@@ -4,7 +4,12 @@ import { UploadOutlined, DownloadOutlined } from '@ant-design/icons';
 
 export default class Certificates extends Component {
   handlePublish=()=>{
-    fetch('/api/publish').then((response)=>{if(response.status===200){message.success('message sent successfully')}}).catch(error=>message.warning(error));
+    var key="updatable";
+    message.loading({content:"Sending request...",key,duration:10});
+    fetch('/api/db/retention')
+      .then(response=>response.json())
+      .then((data)=>message.success({content:data,key}))
+      .catch(error=>message.warning({content:error,key}));
   }
 
   render() {

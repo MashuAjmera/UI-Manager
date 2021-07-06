@@ -7,6 +7,9 @@ db = Blueprint('db',__name__)
 @db.route("/retention",methods=['GET','POST','PUT','DELETE'])
 def retention():
     topic = "uimanager/influxdb/retention"
+    msg={}
+    if request.method=='GET':
+        msg['policy']={"checking":"correct"}
     if request.method=='POST':
         msg={
             'TASK':'CREATE',
@@ -17,7 +20,6 @@ def retention():
             'SHARD':request.json['SHARD'],
             'DEFAULT':request.json['DEFAULT']
         }
-        return mqtt.publish(json.dumps(msg),topic)
     elif request.method=='PUT':
         msg={
             'TASK':'ALTER',
@@ -28,14 +30,13 @@ def retention():
             'SHARD':request.json['SHARD'],
             'DEFAULT':request.json['DEFAULT']
         }
-        return mqtt.publish(json.dumps(msg),topic)
     elif request.method=='DELETE':
         msg={
             'TASK':'DROP',
             'POLICY':request.json['POLICY'],
             'ON':request.json['ON']
-        }
-        return mqtt.publish(json.dumps(msg),topic)
+        } 
+    return jsonify(mqtt.request(json.dumps(msg),topic))
 
 
 @db.route("/organization",methods=['GET','POST','PUT','DELETE'])
@@ -111,7 +112,7 @@ def member():
 
 @db.route("/buckets/<name>",methods=['GET'])
 def buckets(name):
-    thisdict = {
-        "bucket": name
-    }
+    msg = {}
+    msg['bucket']={"name":name}
     topic = "uimanager/influxdb"
+    return jsonify(mqtt.request(json.dumps(msg),topic))
