@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Layout, Button, PageHeader, Breadcrumb, message, Table, Row, Col} from 'antd';
-import { HomeOutlined, DownloadOutlined, UserAddOutlined, FolderAddOutlined, UsergroupAddOutlined, AppstoreAddOutlined} from '@ant-design/icons';
+import { Layout, Button, message, Table, Row, Col} from 'antd';
+import { UserAddOutlined, FolderAddOutlined, UsergroupAddOutlined, AppstoreAddOutlined} from '@ant-design/icons';
 
 export default class Database extends Component {
   state = { orgs: [{ name: "Jack", id: "da" }, { name: "Lucy", id: "da" }, { name: "Tom", id: "Tomss" }], users: [],org:{},user:{} }
@@ -32,7 +32,6 @@ export default class Database extends Component {
 
   render() {
 
-    const { Content } = Layout;
     const columns = [
       {
         title: 'Name',
@@ -80,21 +79,6 @@ export default class Database extends Component {
 
     return (
       <Layout className="site-layout">
-        <PageHeader
-          ghost={false}
-          onBack={() => window.history.back()}
-          breadcrumb={<Breadcrumb separator=">">
-            <Breadcrumb.Item href="/"><HomeOutlined /></Breadcrumb.Item>
-            <Breadcrumb.Item href="/software">Software</Breadcrumb.Item>
-          </Breadcrumb>}
-          title="Database"
-          subTitle="InfluxDb"
-          extra={[
-            <Button icon={<DownloadOutlined />} onClick={this.handlePublish}>Publish</Button>
-          ]}
-        ></PageHeader>
-        <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-          <div className="site-layout-background" style={{ padding: 24}}>
             <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
               <Col span={12} className="gutter-row">
                 <Table style={{ paddingBottom: 24}}
@@ -139,8 +123,7 @@ export default class Database extends Component {
               dataSource={data}
               title={() => <>Organization Members<Button icon={<UsergroupAddOutlined />} style={{float: 'right'}}>Add New</Button></>}
             />
-          </div>
-        </Content></Layout>
+        </Layout>
     );
   }
 }

@@ -1,29 +1,26 @@
 import React, { Component } from "react";
-import { Layout, Button, PageHeader } from 'antd';
-import { UserAddOutlined } from '@ant-design/icons';
+import { Layout, Tabs } from 'antd';
+import { AppleOutlined, DatabaseOutlined } from '@ant-design/icons';
+import Database from "./database.component.js"
 
-export default class Database extends Component {
+export default class Software extends Component {
   handleDownload = () => {
     fetch('/api/downloader').then((data) => console.log(data));
   }
 
   render() {
 
+    const { TabPane } = Tabs;
     const { Content } = Layout;
 
     return (
       <Layout className="site-layout">
-        <PageHeader
-          ghost={false}
-          onBack={() => window.history.back()}
-          title="Software"
-          subTitle=""
-          extra={[
-            <Button icon={<UserAddOutlined />} href="/software/database">Database</Button>
-          ]}
-        ></PageHeader>
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
-          <div className="site-layout-background" style={{ padding: 24, textAlign: 'center' }}>
+          <div className="site-layout-background" style={{ padding: 24}}>
+            <Tabs defaultActiveKey="1">
+              <TabPane tab={<span><DatabaseOutlined />Database</span>} key="1" ><Database /></TabPane>
+              <TabPane tab={<span><AppleOutlined />Software 2</span>} key="2" >Tab 1</TabPane>
+            </Tabs>
           </div>
         </Content>
       </Layout>

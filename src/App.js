@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Nav from "./components/nav.component.js"
 import Overview from "./components/overview.component.js"
-import Database from "./components/database.component.js"
 import Software from "./components/software.component.js"
 import Certificates from "./components/certificates.component.js"
 import { Layout } from 'antd';
@@ -25,7 +24,6 @@ export default class App extends Component {
             <Switch>
               <Route path="/" exact component={Overview} />
               <Route path="/certificates" component={Certificates} />
-              <Route path="/software/database" component={Database} />
               <Route path="/software" component={Software} />
               <Route component={Overview} />
             </Switch>
