@@ -4,10 +4,6 @@ import { AppleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import Database from "./database.component.js"
 
 export default class Software extends Component {
-  handleDownload = () => {
-    fetch('/api/downloader').then((data) => console.log(data));
-  }
-
   render() {
 
     const { TabPane } = Tabs;
@@ -17,7 +13,7 @@ export default class Software extends Component {
       <Layout className="site-layout">
         <Content style={{ margin: '24px 16px 0', overflow: 'initial' }}>
           <div className="site-layout-background" style={{ padding: 24}}>
-            <Tabs defaultActiveKey="1">
+            <Tabs defaultActiveKey="1" centered>
               <TabPane tab={<span><DatabaseOutlined />Database</span>} key="1" ><Database /></TabPane>
               <TabPane tab={<span><AppleOutlined />Software 2</span>} key="2" >Tab 1</TabPane>
             </Tabs>
