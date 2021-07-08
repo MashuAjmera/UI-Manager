@@ -1,0 +1,296 @@
+import React, { Component, useContext, useState, useEffect, useRef } from "react";
+import { Button, Table, Input, Popconfirm, Form, Tooltip, message, Modal, InputNumber } from 'antd';
+import { AppstoreAddOutlined, InfoCircleOutlined } from '@ant-design/icons';
+
+const EditableContext = React.createContext(null);
+
+const EditableRow = ({ index, ...props }) => {
+  const [form] = Form.useForm();
+  return (
+    <Form form={form} component={false}>
+      <EditableContext.Provider value={form}>
+        <tr {...props} />
+      </EditableContext.Provider>
+    </Form>
+  );
+};
+
+const EditableCell = ({
+  title,
+  editable,
+  children,
+  dataIndex,
+  record,
+  handleSave,
+  ...restProps
+}) => {
+  const [editing, setEditing] = useState(false);
+  const inputRef = useRef(null);
+  const form = useContext(EditableContext);
+  useEffect(() => {
+    if (editing) {
+      inputRef.current.focus();
+    }
+  }, [editing]);
+
+  const toggleEdit = () => {
+    setEditing(!editing);
+    form.setFieldsValue({
+      [dataIndex]: record[dataIndex],
+    });
+  };
+
+  const save = async () => {
+    try {
+      const values = await form.validateFields();
+      toggleEdit();
+      handleSave({ ...record, ...values });
+    } catch (errInfo) {
+      console.log('Save failed:', errInfo);
+    }
+  };
+
+  let childNode = children;
+
+  if (editable) {
+    childNode = editing ? (
+      <Form.Item
+        style={{
+          margin: 0,
+        }}
+        name={dataIndex}
+        rules={[
+          {
+            required: true,
+            message: `${title} is required.`,
+          },
+        ]}
+      >
+        <Input ref={inputRef} onPressEnter={save} onBlur={save} suffix={
+          <Tooltip title="Press Enter to Save">
+            <InfoCircleOutlined style={{ color: 'rgba(0,0,0,.45)' }} />
+          </Tooltip>
+        } />
+      </Form.Item>
+    ) : (
+      <Tooltip title="Click to Edit"
+        className="editable-cell-value-wrap"
+        onClick={toggleEdit}>
+        {children}
+      </Tooltip>
+    );
+  }
+
+  return <td {...restProps}>{childNode}</td>;
+};
+
+
+const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) => {
+  const [form] = Form.useForm();
+  return (
+    <Modal
+      visible={visible}
+      confirmLoading={confirmLoading}
+      title="Create a new bucket"
+      okText="Add"
+      onCancel={()=>{form.resetFields();onCancel();}}
+      onOk={() => {
+        form
+          .validateFields()
+          .then((values) => {
+            form.resetFields();
+            onCreate(values);
+          })
+          .catch((info) => {
+            console.log('Validate Failed:', info);
+          });
+      }}
+    >
+      <Form form={form} name="form_in_modal"
+        labelCol={{
+          span: 8,
+        }}
+        wrapperCol={{
+          span: 16,
+        }}
+        initialValues={{
+          remember: true,
+        }}>
+        <Form.Item
+          label="Bucket Name"
+          name="name"
+          rules={[
+            {
+              required: true,
+              message: 'Please input the bucket name!',
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Retention Period (ns)"
+          name="retentionPeriod"
+          rules={[
+            {
+              required: true,
+              message: 'Please input the retention period!',
+            },
+          ]}
+        >
+          <InputNumber min={0}/>
+        </Form.Item>
+        <Form.Item
+          label="Organization"
+          name="organization"
+          rules={[
+            {
+              required: true,
+              message: 'Please input the bucket name!',
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Description"
+          name="description"
+        >
+          <Input.TextArea />
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
+};
+
+
+export default class Buckets extends Component {
+  state = { bucket: {}, buckets: [], confirmLoading:false, modal:false };
+
+  componentDidMount() {
+    this.handleView();
+  }
+
+  handleView=()=>{
+    fetch('/api/db/bucket')
+      .then(response => response.json())
+      .then((data) => this.setState({buckets:data}))
+      .catch(error => message.warning({ content: error}));
+  }
+
+  handleDelete = (id) => {
+    this.setState({
+      buckets: this.state.buckets.filter((item) => item.id !== id),
+    });
+  };
+
+  handleAdd = (values) => {
+    this.setState({confirmLoading:true},()=>
+    fetch('/api/db/bucket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(values)
+    })
+    .then(response => response.json())
+      .then((data) => this.setState({modal:false, confirmLoading:false},message.success(data)))
+      .then(() => this.handleView())
+      .catch(error => message.warning(error)));
+  };
+
+  handleSave = (row) => {
+    const newData = [...this.state.buckets];
+    const index = newData.findIndex((item) => row.id === item.id);
+    const item = newData[index];
+    newData.splice(index, 1, { ...item, ...row });
+    this.setState({
+      buckets: newData,
+    });
+  };
+
+  handleCancel = () => {
+    this.setState({ modal: false });
+  };
+
+  render() {
+
+    const columns = [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        width: '30%',
+        editable: true,
+      },
+      {
+        title: 'Retention Policy',
+        dataIndex: 'retentionPeriod',
+        editable: true,
+      },
+      {
+        title: 'Organization',
+        dataIndex: 'organization',
+      },
+      {
+        title: 'Description',
+        dataIndex: 'description',
+      },
+      {
+        title: 'Operation',
+        dataIndex: 'operation',
+        render: (_, record) =>
+          this.state.buckets.length >= 1 ? (
+            <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.id)}>
+              <Button type="link">Delete</Button>
+            </Popconfirm>
+          ) : null,
+      },
+    ];
+
+    const components = {
+      body: {
+        row: EditableRow,
+        cell: EditableCell,
+      },
+    };
+
+    const columns2 = columns.map((col) => {
+      if (!col.editable) {
+        return col;
+      }
+
+      return {
+        ...col,
+        onCell: (record) => ({
+          record,
+          editable: col.editable,
+          dataIndex: col.dataIndex,
+          title: col.title,
+          handleSave: this.handleSave,
+        }),
+      };
+    });
+
+    return (
+      <>
+        <Table
+          components={components}
+          rowClassName={() => 'editable-row'} style={{ paddingBottom: 24 }}
+          rowSelection={{
+            type: 'radio',
+            ...this.props.rowSelection,
+          }}
+          pagination={false}
+          dataSource={this.state.buckets}
+          columns={columns2}
+          title={() => <>Buckets<Button
+            icon={<AppstoreAddOutlined />}
+            onClick={() => this.setState({ modal: true })}
+            style={{ float: 'right' }}
+          >
+            Add New
+          </Button></>}
+        />
+        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} />
+      </>
+    );
+  }
+}
