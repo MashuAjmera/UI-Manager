@@ -11,7 +11,7 @@ res=""
 
 def on_message(client, userdata, msg):
     global res
-    res=f"Received `{msg.payload.decode()}` from `{msg.topic}` topic"
+    res=msg.payload.decode()
     client.disconnect()
 
 def request(msg,topic):
