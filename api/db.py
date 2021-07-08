@@ -52,10 +52,8 @@ def bucket():
         }
     elif request.method=='DELETE':
         msg['bucket']={
-            'task':'create',
-            'n':request.json['n'],
-            'o':request.json['o'],
-            'i':request.json['i']
+            'task':'delete',
+            'i':request.json['id']
         }
     return mqtt.request(json.dumps(msg),topic)
 
