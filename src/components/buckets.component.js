@@ -85,7 +85,7 @@ const EditableCell = ({
 };
 
 
-const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) => {
+const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading }) => {
   const [form] = Form.useForm();
   return (
     <Modal
@@ -93,13 +93,15 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) =>
       confirmLoading={confirmLoading}
       title="Create a new bucket"
       okText="Add"
-      onCancel={()=>{form.resetFields();onCancel();}}
+      onCancel={() => { form.resetFields(); onCancel(); }}
       onOk={() => {
         form
           .validateFields()
           .then((values) => {
             form.resetFields();
+            values.retentionPeriod=values.rpw+'w'+values.rpd+'d'+values.rph+'h'+values.rpm+'m'+values.rps+'s';
             onCreate(values);
+            console.log(values);
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -108,13 +110,17 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) =>
     >
       <Form form={form} name="form_in_modal"
         labelCol={{
-          span: 8,
+          span: 6,
         }}
         wrapperCol={{
-          span: 16,
+          span: 18,
         }}
         initialValues={{
-          remember: true,
+          rpw: 0,
+          rpd: 0,
+          rph: 0,
+          rpm: 0,
+          rps: 0,
         }}>
         <Form.Item
           label="Bucket Name"
@@ -128,18 +134,67 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) =>
         >
           <Input />
         </Form.Item>
-        <Form.Item
-          label="Retention Period (ns)"
-          name="retentionPeriod"
-          rules={[
-            {
-              required: true,
-              message: 'Please input the retention period!',
-            },
-          ]}
-        >
-          <InputNumber min={0}/>
-        </Form.Item>
+          <Form.Item
+          label="Retention Period"
+          >
+        <Input.Group compact >
+          <Form.Item
+            name="rpw"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the number of weeks!',
+              },
+            ]}  style={{ width: '20%' }} 
+          >
+            <Input addonAfter={'w'}/>
+          </Form.Item>
+          <Form.Item
+            name="rpd"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the number of weeks!',
+              },
+            ]}  style={{ width: '20%' }} 
+          >
+            <Input addonAfter={'d'}/>
+          </Form.Item>
+          <Form.Item
+            name="rph"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the number of hours!',
+              },
+            ]}  style={{ width: '20%' }} 
+          >
+            <Input addonAfter={'h'} />
+          </Form.Item>
+          <Form.Item
+            name="rpm"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the number of minutes!',
+              },
+            ]}  style={{ width: '20%' }} 
+          >
+            <Input addonAfter={'m'} />
+          </Form.Item>
+          <Form.Item
+            name="rps"
+            rules={[
+              {
+                required: true,
+                message: 'Please input the number of seconds!',
+              },
+            ]}  style={{ width: '20%' }} 
+          >
+            <Input addonAfter={'s'} />
+          </Form.Item>
+        </Input.Group>
+          </Form.Item>
         <Form.Item
           label="Organization"
           name="organization"
@@ -165,36 +220,43 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel,confirmLoading }) =>
 
 
 export default class Buckets extends Component {
-  state = { bucket: {}, buckets: [], confirmLoading:false, modal:false };
+  state = { bucket: {}, buckets: [], confirmLoading: false, modal: false };
 
   componentDidMount() {
     this.handleView();
   }
 
-  handleView=()=>{
+  handleView = () => {
     fetch('/api/db/bucket')
       .then(response => response.json())
-      .then((data) => this.setState({buckets:data}))
-      .catch(error => message.warning({ content: error}));
+      .then((data) => this.setState({ buckets: data }))
+      .catch(error => message.warning({ content: error }));
   }
 
   handleDelete = (id) => {
-    this.setState({
-      buckets: this.state.buckets.filter((item) => item.id !== id),
-    });
+    var key = 'updatable';
+    message.loading({ content: 'Sending Request...', key, duration: 10 });
+    fetch('/api/db/bucket', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    }).then(response => response.json())
+      .then((data) => message.success({ content: data, key }))
+      .then(() => this.handleView())
+      .catch(error => message.warning({ content: error, key }));
   };
 
   handleAdd = (values) => {
-    this.setState({confirmLoading:true},()=>
-    fetch('/api/db/bucket', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values)
-    })
-    .then(response => response.json())
-      .then((data) => this.setState({modal:false, confirmLoading:false},message.success(data)))
-      .then(() => this.handleView())
-      .catch(error => message.warning(error)));
+    this.setState({ confirmLoading: true }, () =>
+      fetch('/api/db/bucket', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
+      })
+        .then(response => response.json())
+        .then((data) => this.setState({ modal: false, confirmLoading: false }, message.success(data)))
+        .then(() => this.handleView())
+        .catch(error => message.warning(error)));
   };
 
   handleSave = (row) => {
