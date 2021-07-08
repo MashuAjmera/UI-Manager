@@ -1,33 +1,22 @@
 import React, { Component } from "react";
-import { Layout, Button, message, Table, Row, Col} from 'antd';
-import { UserAddOutlined, FolderAddOutlined, UsergroupAddOutlined, AppstoreAddOutlined} from '@ant-design/icons';
+import { Layout, Button, Table, Row, Col } from 'antd';
+import { UserAddOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import Buckets from "./buckets.component.js"
+import Organizations from "./organizations.component.js"
 
 export default class Database extends Component {
-  state = { orgs: [{ name: "Jack", id: "da" }, { name: "Lucy", id: "da" }, { name: "Tom", id: "Tomss" }], users: [],org:{},user:{} }
+  state = { orgs: [{ name: "Jack", id: "da" }, { name: "Lucy", id: "da" }, { name: "Tom", id: "Tomss" }], users: [], org: {}, user: {} };
 
   componentDidMount() {
 
     // fetch('/api/db/organization')
     //   // .then(response => response.json())
-    //   .then((data) => this.setState({org:data}))
+    //   .then((data) => this.setState({orgs:data}))
     //   .catch(error => message.warning({ content: error}));
     // fetch('/api/db/user')
     //   // .then(response => response.json())
-    //   .then((data) => this.setState({user:data}))
+    //   .then((data) => this.setState({users:data}))
     //   .catch(error => message.warning({ content: error}));
-  }
-
-  handlePublish = () => {
-    var key = "updatable";
-    message.loading({ content: "Sending request...", key, duration: 10 });
-    fetch('/api/db/retention')
-      .then(response => response.json())
-      .then((data) => message.success({ content: data, key }))
-      .catch(error => message.warning({ content: error, key }));
-  }
-
-  handleChange = (value) => {
-    console.log(`selected ${value}`);
   }
 
   render() {
@@ -76,54 +65,36 @@ export default class Database extends Component {
       },
     ];
 
-
     return (
       <Layout className="site-layout">
-            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
-              <Col span={12} className="gutter-row">
-                <Table style={{ paddingBottom: 24}}
-                  rowSelection={{
-                    type: 'radio',
-                    ...rowSelection,
-                  }}
-                  pagination={false}
-                  columns={columns}
-                  dataSource={data}
-                  title={() => <>Organizations<Button icon={<FolderAddOutlined />} style={{float: 'right'}}>Add New</Button></>}
-                /></Col>
-              <Col span={12} className="gutter-row">
-                <Table style={{ paddingBottom: 24}}
-                  rowSelection={{
-                    type: 'radio',
-                    ...rowSelection,
-                  }}
-                  pagination={false}
-                  columns={columns}
-                  dataSource={data}
-                  title={() => <>Users<Button icon={<UserAddOutlined />} style={{float: 'right'}}>Add New</Button></>}
-                /></Col>
-            </Row>
-            <Table
+        <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}>
+          <Col span={12} className="gutter-row">
+            <Organizations rowSelection={rowSelection} />
+          </Col>
+          <Col span={12} className="gutter-row">
+            <Table style={{ paddingBottom: 24 }}
               rowSelection={{
                 type: 'radio',
                 ...rowSelection,
-              }} style={{ paddingBottom: 24, borderTopLeftRadius: 10}}
+              }}
               pagination={false}
               columns={columns}
               dataSource={data}
-              title={() => <>Buckets<Button icon={<AppstoreAddOutlined />} style={{float: 'right'}}>Add New</Button></>}
-            />
-            <Table
-              rowSelection={{
-                type: 'radio',
-                ...rowSelection,
-              }} style={{ paddingBottom: 24}}
-              pagination={false}
-              columns={columns}
-              dataSource={data}
-              title={() => <>Organization Members<Button icon={<UsergroupAddOutlined />} style={{float: 'right'}}>Add New</Button></>}
-            />
-        </Layout>
+              title={() => <>Users<Button icon={<UserAddOutlined />} style={{ float: 'right' }}>Add New</Button></>}
+            /></Col>
+        </Row>
+        <Buckets rowSelection={rowSelection} />
+        <Table
+          rowSelection={{
+            type: 'radio',
+            ...rowSelection,
+          }} style={{ paddingBottom: 24 }}
+          pagination={false}
+          columns={columns}
+          dataSource={data}
+          title={() => <>Organization Members<Button icon={<UsergroupAddOutlined />} style={{ float: 'right' }}>Add New</Button></>}
+        />
+      </Layout>
     );
   }
 }
