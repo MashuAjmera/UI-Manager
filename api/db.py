@@ -29,26 +29,18 @@ def organization():
     return mqtt.request(json.dumps(msg),topic)
 
 
-@db.route("/bucket",methods=['GET','POST','PUT','DELETE'])
+@db.route("/bucket",methods=['GET','POST','DELETE'])
 def bucket():
     topic = "uimanager/influxdb"
     msg={}
     if request.method=='GET':
         msg['bucket']={'task':'list'}
-    if request.method=='POST':
+    elif request.method=='POST':
         msg['bucket']={
             'task':'create',
             'n':request.json['name'],
             'o':request.json['organization'],
             'r':request.json['retentionPeriod'],
-        }
-    elif request.method=='PUT':
-        msg['bucket']={
-            'task':'update',
-            'n':request.json['n'],
-            'o':request.json['o'],
-            'r':request.json['r'],
-            'i':request.json['i'],
         }
     elif request.method=='DELETE':
         msg['bucket']={
@@ -56,6 +48,26 @@ def bucket():
             'i':request.json['id']
         }
     return mqtt.request(json.dumps(msg),topic)
+
+@db.route("/bucket/<which>",methods=['PUT'])
+def bucketPUT(which):
+    topic = "uimanager/influxdb"
+    msg={}
+    if(which=='retentionPeriod'):
+        msg['bucket']={
+            'task':'update',
+            'r':request.json['retentionPeriod'],
+            'i':request.json['id'],
+        }
+    elif(which=='name'):
+        msg['bucket']={
+            'task':'update',
+            'n':request.json['name'],
+            'o':request.json['orgID'],
+            'i':request.json['id'],
+        }
+    return mqtt.request(json.dumps(msg),topic)
+
 
 @db.route("/member",methods=['GET','POST','PUT','DELETE'])
 def member():
@@ -106,11 +118,3 @@ def user():
             'n':request.json['n'],
         }
     return mqtt.request(json.dumps(msg),topic)
-
-@db.route("/buckets/<name>",methods=['GET'])
-def buckets(name):
-    msg = {}
-    msg['org']={"task":'create','n':'abb'}
-    msg['bucket']={"task":'create','n':'bucket1','o':'abb','r':'72h'}
-    topic = "uimanager/influxdb"
-    return jsonify(mqtt.request(json.dumps(msg),topic))
