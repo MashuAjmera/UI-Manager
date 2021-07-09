@@ -67,10 +67,13 @@ def subscribe(client: mqtt_client):
             ]
             client.publish(f"response/{msg.topic}",json.dumps(res))
         elif req['bucket']['task']=='create':
-            res="successful"
+            res="successfully created"
             client.publish(f"response/{msg.topic}",json.dumps(res))
         elif req['bucket']['task']=='delete':
             res="successfully deleted"
+            client.publish(f"response/{msg.topic}",json.dumps(res))
+        elif req['bucket']['task']=='update':
+            res="successfully updated"
             client.publish(f"response/{msg.topic}",json.dumps(res))
 
     client.subscribe(topic)
