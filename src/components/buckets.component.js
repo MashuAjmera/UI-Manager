@@ -1,5 +1,5 @@
 import React, { Component, useContext, useState, useEffect, useRef } from "react";
-import { Button, Table, Input, Popconfirm, Form, Tooltip, message, Modal, InputNumber } from 'antd';
+import { Button, Table, Input, Popconfirm, Form, Tooltip, message, Modal, Select } from 'antd';
 import { AppstoreAddOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const EditableContext = React.createContext(null);
@@ -85,7 +85,7 @@ const EditableCell = ({
 };
 
 
-const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading }) => {
+const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, orgs }) => {
   const [form] = Form.useForm();
   return (
     <Modal
@@ -99,7 +99,7 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading }) =
           .validateFields()
           .then((values) => {
             form.resetFields();
-            values.retentionPeriod=values.rpw+'w'+values.rpd+'d'+values.rph+'h'+values.rpm+'m'+values.rps+'s';
+            values.retentionPeriod = values.rpw + 'w' + values.rpd + 'd' + values.rph + 'h' + values.rpm + 'm' + values.rps + 's';
             onCreate(values);
             console.log(values);
           })
@@ -134,67 +134,67 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading }) =
         >
           <Input />
         </Form.Item>
-          <Form.Item
+        <Form.Item
           label="Retention Period"
-          >
-        <Input.Group compact >
-          <Form.Item
-            name="rpw"
-            rules={[
-              {
-                required: true,
-                message: 'Please input the number of weeks!',
-              },
-            ]}  style={{ width: '20%' }} 
-          >
-            <Input addonAfter={'w'}/>
-          </Form.Item>
-          <Form.Item
-            name="rpd"
-            rules={[
-              {
-                required: true,
-                message: 'Please input the number of weeks!',
-              },
-            ]}  style={{ width: '20%' }} 
-          >
-            <Input addonAfter={'d'}/>
-          </Form.Item>
-          <Form.Item
-            name="rph"
-            rules={[
-              {
-                required: true,
-                message: 'Please input the number of hours!',
-              },
-            ]}  style={{ width: '20%' }} 
-          >
-            <Input addonAfter={'h'} />
-          </Form.Item>
-          <Form.Item
-            name="rpm"
-            rules={[
-              {
-                required: true,
-                message: 'Please input the number of minutes!',
-              },
-            ]}  style={{ width: '20%' }} 
-          >
-            <Input addonAfter={'m'} />
-          </Form.Item>
-          <Form.Item
-            name="rps"
-            rules={[
-              {
-                required: true,
-                message: 'Please input the number of seconds!',
-              },
-            ]}  style={{ width: '20%' }} 
-          >
-            <Input addonAfter={'s'} />
-          </Form.Item>
-        </Input.Group>
-          </Form.Item>
+        >
+          <Input.Group compact >
+            <Form.Item
+              name="rpw"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input the number of weeks!',
+                },
+              ]} style={{ width: '20%' }}
+            >
+              <Input addonAfter={'w'} />
+            </Form.Item>
+            <Form.Item
+              name="rpd"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input the number of weeks!',
+                },
+              ]} style={{ width: '20%' }}
+            >
+              <Input addonAfter={'d'} />
+            </Form.Item>
+            <Form.Item
+              name="rph"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input the number of hours!',
+                },
+              ]} style={{ width: '20%' }}
+            >
+              <Input addonAfter={'h'} />
+            </Form.Item>
+            <Form.Item
+              name="rpm"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input the number of minutes!',
+                },
+              ]} style={{ width: '20%' }}
+            >
+              <Input addonAfter={'m'} />
+            </Form.Item>
+            <Form.Item
+              name="rps"
+              rules={[
+                {
+                  required: true,
+                  message: 'Please input the number of seconds!',
+                },
+              ]} style={{ width: '20%' }}
+            >
+              <Input addonAfter={'s'} />
+            </Form.Item>
+          </Input.Group>
+        </Form.Item>
         <Form.Item
           label="Organization"
           name="organization"
@@ -205,7 +205,16 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading }) =
             },
           ]}
         >
-          <Input />
+          <Select
+            showSearch
+            placeholder="Select"
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            }
+          >
+          {orgs.map(org=><Select.Option key={org} value={org}>{org}</Select.Option>)}
+          </Select>
         </Form.Item>
         <Form.Item
           label="Description"
@@ -234,7 +243,7 @@ export default class Buckets extends Component {
   }
 
   handleDelete = (id) => {
-    var key = 'updatable';
+    const key = 'updatable';
     message.loading({ content: 'Sending Request...', key, duration: 10 });
     fetch('/api/db/bucket', {
       method: 'DELETE',
@@ -263,10 +272,28 @@ export default class Buckets extends Component {
     const newData = [...this.state.buckets];
     const index = newData.findIndex((item) => row.id === item.id);
     const item = newData[index];
-    newData.splice(index, 1, { ...item, ...row });
-    this.setState({
-      buckets: newData,
-    });
+    const key = 'updatable';
+    message.loading({ content: 'Sending Request...', key, duration: 10 });
+    if (row.retentionPeriod != item.retentionPeriod) {
+      fetch('/api/db/bucket/retentionPeriod', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id:row.id,retentionPeriod:row.retentionPeriod })
+      }).then(response => response.json())
+        .then((data) => message.success({ content: data, key }))
+        .then(() => this.handleView())
+        .catch(error => message.warning({ content: error, key }));
+    }
+    else if (row.name != item.name) {
+      fetch('/api/db/bucket/name', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id:row.id,name:row.name,orgID:row.orgID })
+      }).then(response => response.json())
+        .then((data) => message.success({ content: data, key }))
+        .then(() => this.handleView())
+        .catch(error => message.warning({ content: error, key }));
+    }
   };
 
   handleCancel = () => {
@@ -279,12 +306,13 @@ export default class Buckets extends Component {
       {
         title: 'Name',
         dataIndex: 'name',
-        width: '30%',
+        width: '25%',
         editable: true,
       },
       {
-        title: 'Retention Policy',
+        title: 'Retention Policy (ns)',
         dataIndex: 'retentionPeriod',
+        width: '25%',
         editable: true,
       },
       {
@@ -301,7 +329,7 @@ export default class Buckets extends Component {
         render: (_, record) =>
           this.state.buckets.length >= 1 ? (
             <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.id)}>
-              <Button type="link">Delete</Button>
+              <Button type="link" size="small">Delete</Button>
             </Popconfirm>
           ) : null,
       },
@@ -351,7 +379,7 @@ export default class Buckets extends Component {
             Add New
           </Button></>}
         />
-        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} />
+        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} orgs={this.state.buckets.map(bucket=>bucket.orgID)} />
       </>
     );
   }
