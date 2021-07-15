@@ -1,6 +1,6 @@
 import React, { Component, useContext, useState, useEffect, useRef } from "react";
 import { Button, Table, Input, Popconfirm, Form, Tooltip, message, Modal, Select } from 'antd';
-import { AppstoreAddOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { FolderAddOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const EditableContext = React.createContext(null);
 
@@ -213,7 +213,7 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
-          {orgs.map(org=><Select.Option key={org} value={org}>{org}</Select.Option>)}
+          {orgs.map(org=><Select.Option key={org.id} value={org.name}>{org.name}</Select.Option>)}
           </Select>
         </Form.Item>
         <Form.Item
@@ -229,7 +229,7 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
 
 
 export default class Buckets extends Component {
-  state = { bucket: {}, buckets: [], confirmLoading: false, modal: false };
+  state = { bucket: {}, buckets: [], confirmLoading: false, modal: false, orgs:[] };
 
   componentDidMount() {
     this.handleView();
@@ -274,7 +274,7 @@ export default class Buckets extends Component {
     const item = newData[index];
     const key = 'updatable';
     message.loading({ content: 'Sending Request...', key, duration: 10 });
-    if (row.retentionPeriod != item.retentionPeriod) {
+    if (row.retentionPeriod !== item.retentionPeriod) {
       fetch('/api/db/bucket/retentionPeriod', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -284,7 +284,7 @@ export default class Buckets extends Component {
         .then(() => this.handleView())
         .catch(error => message.warning({ content: error, key }));
     }
-    else if (row.name != item.name) {
+    else if (row.name !== item.name) {
       fetch('/api/db/bucket/name', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -299,6 +299,14 @@ export default class Buckets extends Component {
   handleCancel = () => {
     this.setState({ modal: false });
   };
+
+  handleModal=()=>{
+    this.setState({ modal: true });
+    fetch('/api/db/org')
+      .then(response => response.json())
+      .then((data) => this.setState({ orgs: data }))
+      .catch(error => message.warning({ content: error }));
+  }
 
   render() {
 
@@ -372,14 +380,14 @@ export default class Buckets extends Component {
           dataSource={this.state.buckets}
           columns={columns2}
           title={() => <>Buckets<Button
-            icon={<AppstoreAddOutlined />}
-            onClick={() => this.setState({ modal: true })}
+            icon={<FolderAddOutlined />}
+            onClick={this.handleModal}
             style={{ float: 'right' }}
           >
             Add New
           </Button></>}
         />
-        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} orgs={this.state.buckets.map(bucket=>bucket.orgID)} />
+        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} orgs={this.state.orgs} />
       </>
     );
   }
