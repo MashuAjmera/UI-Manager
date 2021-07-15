@@ -4,8 +4,8 @@ import json
 
 db = Blueprint('db',__name__)
 
-@db.route("/organization",methods=['GET','POST','PUT','DELETE'])
-def organization():
+@db.route("/org",methods=['GET','POST','PUT','DELETE'])
+def org():
     topic = "uimanager/influxdb"
     msg={}
     if request.method=='GET':
@@ -13,18 +13,17 @@ def organization():
     if request.method=='POST':
         msg['org']={
             'task':'create',
-            'n':request.json['n']
+            'n':request.json['name']
         }
     elif request.method=='PUT':
         msg['org']={
             'task':'update',
-            'i': request.json['i'],
-            'n': request.json['n']
+            'i': request.json['id']
         }
     elif request.method=='DELETE':
         msg['org']={
-            'task':'create',
-            'i':request.json['i']
+            'task':'delete',
+            'i':request.json['id']
         }
     return mqtt.request(json.dumps(msg),topic)
 
@@ -73,6 +72,11 @@ def bucketPUT(which):
 def member():
     topic = "uimanager/influxdb"
     msg={}
+    if request.method=='GET':
+        msg['bucket']={
+            'task':'list',
+            'n':request.json['name']
+        }
     if request.method=='POST':
         msg['member']={
             'task':'add',
