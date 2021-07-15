@@ -29,53 +29,119 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        time.sleep(3)
+        time.sleep(1)
         req=json.loads(msg.payload.decode())
         print(f"Received `{req}` from `{msg.topic}` topic")
-        if req['bucket']['task']=='list':
-            res=[
-                {
-                    "id": "606c9140d36f326e",
-                    "orgID": "1e99b0e2686cf663",
-                    "type": 0,
-                    "name": "Bucket1",
-                    "description": "",
-                    "retentionPeriod": 345600000000000,
-                    "createdAt": "2021-06-17T08:05:39.989819941Z",
-                    "updatedAt": "2021-06-17T08:05:39.98982006Z"
-                },
-                {
-                    "id": "70942f1469bc2f95",
-                    "orgID": "1e99b0e2686cf663",
-                    "type": 1,
-                    "name": "_monitoring",
-                    "description": "System bucket for monitoring logs",
-                    "retentionPeriod": 604800000000000,
-                    "createdAt": "2021-06-17T08:05:39.98350539Z",
-                    "updatedAt": "2021-06-17T08:05:39.983505479Z"
-                },
-                {
-                    "id": "420ba7a69b618485",
-                    "orgID": "1e99b0e2686cf663",
-                    "type": 1,
-                    "name": "_tasks",
-                    "description": "System bucket for task logs",
-                    "retentionPeriod": 259200000000000,
-                    "createdAt": "2021-06-17T08:05:39.978392507Z",
-                    "updatedAt": "2021-06-17T08:05:39.978392587Z"
-                }
-            ]
-            client.publish(f"response/{msg.topic}",json.dumps(res))
-        elif req['bucket']['task']=='create':
-            res="successfully created"
-            client.publish(f"response/{msg.topic}",json.dumps(res))
-        elif req['bucket']['task']=='delete':
-            res="successfully deleted"
-            client.publish(f"response/{msg.topic}",json.dumps(res))
-        elif req['bucket']['task']=='update':
-            res="successfully updated"
-            client.publish(f"response/{msg.topic}",json.dumps(res))
-
+        if 'bucket' in req.keys():
+            if req['bucket']['task']=='list':
+                res=[
+                    {
+                        "id": "606c9140d36f326e",
+                        "orgID": "1e99b0e2686cf663",
+                        "type": 0,
+                        "name": "Bucket1",
+                        "description": "",
+                        "retentionPeriod": 345600000000000,
+                        "createdAt": "2021-06-17T08:05:39.989819941Z",
+                        "updatedAt": "2021-06-17T08:05:39.98982006Z"
+                    },
+                    {
+                        "id": "70942f1469bc2f95",
+                        "orgID": "1e99b0e2686cf663",
+                        "type": 1,
+                        "name": "_monitoring",
+                        "description": "System bucket for monitoring logs",
+                        "retentionPeriod": 604800000000000,
+                        "createdAt": "2021-06-17T08:05:39.98350539Z",
+                        "updatedAt": "2021-06-17T08:05:39.983505479Z"
+                    },
+                    {
+                        "id": "420ba7a69b618485",
+                        "orgID": "1e99b0e2686cf663",
+                        "type": 1,
+                        "name": "_tasks",
+                        "description": "System bucket for task logs",
+                        "retentionPeriod": 259200000000000,
+                        "createdAt": "2021-06-17T08:05:39.978392507Z",
+                        "updatedAt": "2021-06-17T08:05:39.978392587Z"
+                    }
+                ]
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['bucket']['task']=='create':
+                res="successfully created"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['bucket']['task']=='delete':
+                res="successfully deleted"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['bucket']['task']=='update':
+                res="successfully updated"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+        elif 'org' in req.keys():
+            if req['org']['task']=='list':
+                res=[
+                    {
+                        "id": "1e99b0e2686cf662",
+                        "name": "abbc",
+                        "description": "",
+                        "createdAt": "2021-06-17T08:05:39.975749084Z",
+                        "updatedAt": "2021-06-17T08:05:39.975749166Z"
+                    },
+                    {
+                        "id": "1e99b0e2686cf663",
+                        "name": "abb",
+                        "description": "",
+                        "createdAt": "2021-06-17T08:05:39.975749084Z",
+                        "updatedAt": "2021-06-17T08:05:39.975749166Z"
+                    }
+                ]
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['org']['task']=='create':
+                res="successfully created"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['org']['task']=='delete':
+                res="successfully deleted"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['org']['task']=='update':
+                res="successfully updated"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+        elif 'member' in req.keys():
+            if req['member']['task']=='list':
+                res=[
+                    {
+                        "id": "07b23f9eea10e000",
+                        "name": "mashu",
+                        "status": "active"
+                    }
+                ]
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['member']['task']=='create':
+                res="successfully created"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['member']['task']=='delete':
+                res="successfully deleted"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['member']['task']=='update':
+                res="successfully updated"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+        elif 'user' in req.keys():
+            if req['user']['task']=='list':
+                res=[
+                    {
+                        "id": "07b23f9eea10e000",
+                        "name": "mashu",
+                        "status": "active"
+                    }
+                ]
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['user']['task']=='create':
+                res="successfully created"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['user']['task']=='delete':
+                res="successfully deleted"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
+            elif req['user']['task']=='update':
+                res="successfully updated"
+                client.publish(f"response/{msg.topic}",json.dumps(res))
     client.subscribe(topic)
     client.on_message = on_message
 
