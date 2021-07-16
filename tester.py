@@ -28,16 +28,14 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        time.sleep(1)
         req=json.loads(msg.payload.decode())
         print(f"Received `{req}` from `{msg.topic}` topic")
+        headers = {'Authorization': 'Token token1'}
         if 'bucket' in req.keys():
+            host = 'http://localhost:8086/api/v2/buckets/'
             if req['bucket']['task']=='list':
-                url = 'http://localhost:8086/api/v2/buckets'
-                headers = {'Authorization': 'Token token1'}
-                r = requests.get(url, headers=headers)
-                res=json.loads(r.content)
-                client.publish(f"response/{msg.topic}",json.dumps(res['buckets']))
+                r = requests.get(url=host, headers=headers)
+                res=json.loads(r.content)['buckets']
             elif req['bucket']['task']=='create':
                 payload = {
                     "orgID": req['bucket']['o'],
@@ -50,49 +48,46 @@ def subscribe(client: mqtt_client):
                         }
                     ]
                 }
-                url = 'http://localhost:8086/api/v2/buckets'
-                headers = {'Authorization': 'Token token1'}
-                r=requests.post(url, headers=headers,json=payload)
+                r=requests.post(url=host, headers=headers,json=payload)
                 res=json.loads(r.content)
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['bucket']['task']=='delete':
                 id=req['bucket']['i']
-                url = f'http://localhost:8086/api/v2/buckets/{id}'
-                headers = {'Authorization': 'Token token1'}
-                requests.delete(url, headers=headers)
+                requests.delete(url=host+id, headers=headers)
                 res="successfully deleted"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['bucket']['task']=='update':
-                res="successfully updated"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+                id=req['bucket']['i']
+                if 'd' in req['bucket'].keys():
+                    payload = { "description":req['bucket']['d']}
+                elif 'n' in req['bucket'].keys():
+                    payload = { "name":req['bucket']['n']}
+                elif 'r' in req['bucket'].keys():
+                    payload = { "retentionRules": { "everySeconds":req['bucket']['r'] }}
+                r = requests.patch(url=host+id, headers=headers,json=payload)
+                res=json.loads(r.content)
         elif 'org' in req.keys():
+            host='http://localhost:8086/api/v2/orgs/'
             if req['org']['task']=='list':
-                res=[
-                    {
-                        "id": "1e99b0e2686cf662",
-                        "name": "abbc",
-                        "description": "",
-                        "createdAt": "2021-06-17T08:05:39.975749084Z",
-                        "updatedAt": "2021-06-17T08:05:39.975749166Z"
-                    },
-                    {
-                        "id": "1e99b0e2686cf663",
-                        "name": "abb",
-                        "description": "",
-                        "createdAt": "2021-06-17T08:05:39.975749084Z",
-                        "updatedAt": "2021-06-17T08:05:39.975749166Z"
-                    }
-                ]
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+                r = requests.get(url=host, headers=headers)
+                res=json.loads(r.content)['orgs']
             elif req['org']['task']=='create':
-                res="successfully created"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+                payload = {
+                    "name": req['org']['n'],
+                    'description':req['org']['d'],
+                }
+                r=requests.post(url=host, headers=headers,json=payload)
+                res=json.loads(r.content)
             elif req['org']['task']=='delete':
+                id=req['org']['i']
+                requests.delete(url = host+id, headers=headers)
                 res="successfully deleted"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['org']['task']=='update':
-                res="successfully updated"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+                orgID=req['org']['i']
+                if 'description' in req['org'].keys():
+                    payload = { "description":req['org']['description']}
+                elif 'name' in req['org'].keys():
+                    payload = { "name":req['org']['name']}
+                r = requests.patch(url = host+orgID, headers=headers,json=payload)
+                res=json.loads(r.content)
         elif 'member' in req.keys():
             if req['member']['task']=='list':
                 res=[
@@ -102,16 +97,12 @@ def subscribe(client: mqtt_client):
                         "status": "active"
                     }
                 ]
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['member']['task']=='create':
                 res="successfully created"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['member']['task']=='delete':
                 res="successfully deleted"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['member']['task']=='update':
                 res="successfully updated"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
         elif 'user' in req.keys():
             if req['user']['task']=='list':
                 res=[
@@ -121,16 +112,13 @@ def subscribe(client: mqtt_client):
                         "status": "active"
                     }
                 ]
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['user']['task']=='create':
                 res="successfully created"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['user']['task']=='delete':
                 res="successfully deleted"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['user']['task']=='update':
                 res="successfully updated"
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+        client.publish(f"response/{msg.topic}",json.dumps(res))
     client.subscribe(topic)
     client.on_message = on_message
 
