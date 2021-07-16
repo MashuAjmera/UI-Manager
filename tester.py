@@ -1,6 +1,5 @@
 # python3.6
-
-import random, time, json
+import random, time, json, requests
 from paho.mqtt import client as mqtt_client
 
 
@@ -34,43 +33,33 @@ def subscribe(client: mqtt_client):
         print(f"Received `{req}` from `{msg.topic}` topic")
         if 'bucket' in req.keys():
             if req['bucket']['task']=='list':
-                res=[
-                    {
-                        "id": "606c9140d36f326e",
-                        "orgID": "1e99b0e2686cf663",
-                        "type": 0,
-                        "name": "Bucket1",
-                        "description": "",
-                        "retentionPeriod": 345600000000000,
-                        "createdAt": "2021-06-17T08:05:39.989819941Z",
-                        "updatedAt": "2021-06-17T08:05:39.98982006Z"
-                    },
-                    {
-                        "id": "70942f1469bc2f95",
-                        "orgID": "1e99b0e2686cf663",
-                        "type": 1,
-                        "name": "_monitoring",
-                        "description": "System bucket for monitoring logs",
-                        "retentionPeriod": 604800000000000,
-                        "createdAt": "2021-06-17T08:05:39.98350539Z",
-                        "updatedAt": "2021-06-17T08:05:39.983505479Z"
-                    },
-                    {
-                        "id": "420ba7a69b618485",
-                        "orgID": "1e99b0e2686cf663",
-                        "type": 1,
-                        "name": "_tasks",
-                        "description": "System bucket for task logs",
-                        "retentionPeriod": 259200000000000,
-                        "createdAt": "2021-06-17T08:05:39.978392507Z",
-                        "updatedAt": "2021-06-17T08:05:39.978392587Z"
-                    }
-                ]
-                client.publish(f"response/{msg.topic}",json.dumps(res))
+                url = 'http://localhost:8086/api/v2/buckets'
+                headers = {'Authorization': 'Token token1'}
+                r = requests.get(url, headers=headers)
+                res=json.loads(r.content)
+                client.publish(f"response/{msg.topic}",json.dumps(res['buckets']))
             elif req['bucket']['task']=='create':
-                res="successfully created"
+                payload = {
+                    "orgID": req['bucket']['o'],
+                    "name": req['bucket']['n'],
+                    'description':req['bucket']['d'],
+                    "retentionRules":[
+                        {
+                        "type": "expire",
+                        "everySeconds": req['bucket']['r'],
+                        }
+                    ]
+                }
+                url = 'http://localhost:8086/api/v2/buckets'
+                headers = {'Authorization': 'Token token1'}
+                r=requests.post(url, headers=headers,json=payload)
+                res=json.loads(r.content)
                 client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['bucket']['task']=='delete':
+                id=req['bucket']['i']
+                url = f'http://localhost:8086/api/v2/buckets/{id}'
+                headers = {'Authorization': 'Token token1'}
+                requests.delete(url, headers=headers)
                 res="successfully deleted"
                 client.publish(f"response/{msg.topic}",json.dumps(res))
             elif req['bucket']['task']=='update':

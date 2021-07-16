@@ -23,7 +23,7 @@ def mac():
 @network.route('/ip',methods=['GET','POST'])
 def ip():
     if request.method=='GET':
-        x = subprocess.run('hostname -i', capture_output=True, shell=True)
+        x = subprocess.run('hostname -I', capture_output=True, shell=True)
         return jsonify(x.stdout.decode())
     elif request.method=='POST':
         dname='enp0s3'
