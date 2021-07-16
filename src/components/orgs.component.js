@@ -99,9 +99,7 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading}) =>
           .validateFields()
           .then((values) => {
             form.resetFields();
-            values.retentionPeriod = values.rpw + 'w' + values.rpd + 'd' + values.rph + 'h' + values.rpm + 'm' + values.rps + 's';
             onCreate(values);
-            console.log(values);
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -114,6 +112,9 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading}) =>
         }}
         wrapperCol={{
           span: 18,
+        }}
+        initialValues={{
+          description: "",
         }}>
         <Form.Item
           label="Organization Name"
@@ -143,10 +144,10 @@ export default class Organizations extends Component {
   state = { confirmLoading: false, modal: false, orgs:[] };
 
   componentDidMount() {
-    this.handleView();
+    this.handleList();
   }
 
-  handleView = () => {
+  handleList = () => {
     fetch('/api/db/org')
       .then(response => response.json())
       .then((data) => this.setState({ orgs: data }))
@@ -162,11 +163,11 @@ export default class Organizations extends Component {
       body: JSON.stringify({ id })
     }).then(response => response.json())
       .then((data) => message.success({ content: data, key }))
-      .then(() => this.handleView())
+      .then(() => this.handleList())
       .catch(error => message.warning({ content: error, key }));
   };
 
-  handleAdd = (values) => {
+  handleCreate = (values) => {
     this.setState({ confirmLoading: true }, () =>
       fetch('/api/db/org', {
         method: 'POST',
@@ -174,21 +175,29 @@ export default class Organizations extends Component {
         body: JSON.stringify(values)
       })
         .then(response => response.json())
-        .then((data) => this.setState({ modal: false, confirmLoading: false }, message.success(data)))
-        .then(() => this.handleView())
+        .then((data) => this.setState({ modal: false, confirmLoading: false, orgs: [...this.state.orgs, data] }, message.success("successfully created")))
+        .then(() => this.handleList())
         .catch(error => message.warning(error)));
   };
 
   handleSave = (row) => {
+    const newData = [...this.state.orgs];
+    const index = newData.findIndex((item) => row.id === item.id);
+    const item = newData[index];
     const key = 'updatable';
     message.loading({ content: 'Sending Request...', key, duration: 10 });
+    var which;
+    if (row.name !== item.name) {which="name"}
+    else if (row.description !== item.description) { which="description" }
     fetch('/api/db/org', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(row)
+      body: JSON.stringify({ id: row.id, [which]: row[which] })
     }).then(response => response.json())
-      .then((data) => message.success({ content: data, key }))
-      .then(() => this.handleView())
+    .then((data) => {
+      newData.splice(index, 1, data);
+      this.setState({ orgs: newData }, message.success({ content: "successfully updated", key }));
+    })
       .catch(error => message.warning({ content: error, key }));
   };
 
@@ -210,15 +219,17 @@ export default class Organizations extends Component {
       {
         title: 'Name',
         dataIndex: 'name',
-        width: '25%',
+        width: '35%',
         editable: true,
       },
       {
         title: 'Description',
         dataIndex: 'description',
+        editable: true,
       },
       {
         title: 'Operation',
+        width: '10%',
         dataIndex: 'operation',
         render: (_, record) =>
           this.state.orgs.length >= 1 ? (
@@ -273,7 +284,7 @@ export default class Organizations extends Component {
             Add New
           </Button></>}
         />
-        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} orgs={this.state.orgs} />
+        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleCreate} onCancel={this.handleCancel} orgs={this.state.orgs} />
       </>
     );
   }
