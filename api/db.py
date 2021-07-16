@@ -40,6 +40,7 @@ def bucket():
             'n':request.json['name'],
             'o':request.json['organization'],
             'r':request.json['retentionPeriod'],
+            'd':request.json['description'],
         }
     elif request.method=='DELETE':
         msg['bucket']={
