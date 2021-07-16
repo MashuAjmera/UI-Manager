@@ -1,5 +1,5 @@
 import React, { Component, useContext, useState, useEffect, useRef } from "react";
-import { Button, Table, Input, Popconfirm, Form, Tooltip, message, Modal, Select } from 'antd';
+import { Button, Table, Input, InputNumber, Popconfirm, Form, Tooltip, message, Modal, Select } from 'antd';
 import { FolderAddOutlined, InfoCircleOutlined } from '@ant-design/icons';
 
 const EditableContext = React.createContext(null);
@@ -92,16 +92,14 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
       visible={visible}
       confirmLoading={confirmLoading}
       title="Create a new bucket"
-      okText="Add"
+      okText="Create"
       onCancel={() => { form.resetFields(); onCancel(); }}
       onOk={() => {
         form
           .validateFields()
           .then((values) => {
             form.resetFields();
-            values.retentionPeriod = values.rpw + 'w' + values.rpd + 'd' + values.rph + 'h' + values.rpm + 'm' + values.rps + 's';
             onCreate(values);
-            console.log(values);
           })
           .catch((info) => {
             console.log('Validate Failed:', info);
@@ -110,17 +108,13 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
     >
       <Form form={form} name="form_in_modal"
         labelCol={{
-          span: 6,
+          span: 8,
         }}
         wrapperCol={{
           span: 18,
         }}
         initialValues={{
-          rpw: 0,
-          rpd: 0,
-          rph: 0,
-          rpm: 0,
-          rps: 0,
+          description: "",
         }}>
         <Form.Item
           label="Bucket Name"
@@ -135,65 +129,16 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
           <Input />
         </Form.Item>
         <Form.Item
-          label="Retention Period"
+          label="Retention Persiod"
+          name="retentionPeriod"
+          rules={[
+            {
+              required: true,
+              message: 'Please input the bucket name!',
+            },
+          ]}
         >
-          <Input.Group compact >
-            <Form.Item
-              name="rpw"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the number of weeks!',
-                },
-              ]} style={{ width: '20%' }}
-            >
-              <Input addonAfter={'w'} />
-            </Form.Item>
-            <Form.Item
-              name="rpd"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the number of weeks!',
-                },
-              ]} style={{ width: '20%' }}
-            >
-              <Input addonAfter={'d'} />
-            </Form.Item>
-            <Form.Item
-              name="rph"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the number of hours!',
-                },
-              ]} style={{ width: '20%' }}
-            >
-              <Input addonAfter={'h'} />
-            </Form.Item>
-            <Form.Item
-              name="rpm"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the number of minutes!',
-                },
-              ]} style={{ width: '20%' }}
-            >
-              <Input addonAfter={'m'} />
-            </Form.Item>
-            <Form.Item
-              name="rps"
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input the number of seconds!',
-                },
-              ]} style={{ width: '20%' }}
-            >
-              <Input addonAfter={'s'} />
-            </Form.Item>
-          </Input.Group>
+          <InputNumber min={3600} addonAfter={'s'} />
         </Form.Item>
         <Form.Item
           label="Organization"
@@ -213,7 +158,7 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
               option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
           >
-          {orgs.map(org=><Select.Option key={org.id} value={org.name}>{org.name}</Select.Option>)}
+            {orgs.map(org => <Select.Option key={org.id} value={org.id}>{org.name}</Select.Option>)}
           </Select>
         </Form.Item>
         <Form.Item
@@ -229,13 +174,13 @@ const CollectionCreateForm = ({ visible, onCreate, onCancel, confirmLoading, org
 
 
 export default class Buckets extends Component {
-  state = { bucket: {}, buckets: [], confirmLoading: false, modal: false, orgs:[] };
+  state = { bucket: {}, buckets: [], confirmLoading: false, modal: false, orgs: [] };
 
   componentDidMount() {
-    this.handleView();
+    this.handleList();
   }
 
-  handleView = () => {
+  handleList = () => {
     fetch('/api/db/bucket')
       .then(response => response.json())
       .then((data) => this.setState({ buckets: data }))
@@ -250,12 +195,14 @@ export default class Buckets extends Component {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id })
     }).then(response => response.json())
-      .then((data) => message.success({ content: data, key }))
-      .then(() => this.handleView())
+      .then((data) => {
+        this.handleList();
+        message.success({ content: data, key })
+      })
       .catch(error => message.warning({ content: error, key }));
   };
 
-  handleAdd = (values) => {
+  handleCreate = (values) => {
     this.setState({ confirmLoading: true }, () =>
       fetch('/api/db/bucket', {
         method: 'POST',
@@ -263,8 +210,7 @@ export default class Buckets extends Component {
         body: JSON.stringify(values)
       })
         .then(response => response.json())
-        .then((data) => this.setState({ modal: false, confirmLoading: false }, message.success(data)))
-        .then(() => this.handleView())
+        .then((data) => this.setState({ modal: false, confirmLoading: false, buckets: [...this.state.buckets, data] }, message.success("successfully created")))
         .catch(error => message.warning(error)));
   };
 
@@ -274,33 +220,27 @@ export default class Buckets extends Component {
     const item = newData[index];
     const key = 'updatable';
     message.loading({ content: 'Sending Request...', key, duration: 10 });
-    if (row.retentionPeriod !== item.retentionPeriod) {
-      fetch('/api/db/bucket/retentionPeriod', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id:row.id,retentionPeriod:row.retentionPeriod })
-      }).then(response => response.json())
-        .then((data) => message.success({ content: data, key }))
-        .then(() => this.handleView())
-        .catch(error => message.warning({ content: error, key }));
-    }
-    else if (row.name !== item.name) {
-      fetch('/api/db/bucket/name', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id:row.id,name:row.name,orgID:row.orgID })
-      }).then(response => response.json())
-        .then((data) => message.success({ content: data, key }))
-        .then(() => this.handleView())
-        .catch(error => message.warning({ content: error, key }));
-    }
+    var which;
+    if (row.name !== item.name) {which="name"}
+    else if (row.description !== item.description) { which="description" }
+    else if (row.retentionPeriod !== item.retentionPeriod) { which="retentionPeriod" }
+    fetch('/api/db/bucket', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: row.id, [which]: row[which] })
+    }).then(response => response.json())
+    .then((data) => {
+      newData.splice(index, 1, data);
+      this.setState({ buckets: newData }, message.success({ content: "successfully updated", key }));
+    })
+      .catch(error => message.warning({ content: error, key }));
   };
 
   handleCancel = () => {
     this.setState({ modal: false });
   };
 
-  handleModal=()=>{
+  handleModal = () => {
     this.setState({ modal: true });
     fetch('/api/db/org')
       .then(response => response.json())
@@ -325,11 +265,12 @@ export default class Buckets extends Component {
       },
       {
         title: 'Organization',
-        dataIndex: 'organization',
+        dataIndex: 'orgID',
       },
       {
         title: 'Description',
         dataIndex: 'description',
+        editable: true,
       },
       {
         title: 'Operation',
@@ -384,10 +325,10 @@ export default class Buckets extends Component {
             onClick={this.handleModal}
             style={{ float: 'right' }}
           >
-            Add New
+            Create New
           </Button></>}
         />
-        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleAdd} onCancel={this.handleCancel} orgs={this.state.orgs} />
+        <CollectionCreateForm visible={this.state.modal} confirmLoading={this.state.confirmLoading} onCreate={this.handleCreate} onCancel={this.handleCancel} orgs={this.state.orgs} />
       </>
     );
   }
