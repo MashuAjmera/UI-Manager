@@ -13,13 +13,18 @@ def org():
     if request.method=='POST':
         msg['org']={
             'task':'create',
-            'n':request.json['name']
+            'n':request.json['name'],
+            'd':request.json['description']
         }
     elif request.method=='PUT':
         msg['org']={
             'task':'update',
             'i': request.json['id']
         }
+        if 'name' in request.json.keys():
+            msg['org']['name']=request.json['name']
+        elif 'description' in request.json.keys():
+            msg['org']['description']=request.json['description']
     elif request.method=='DELETE':
         msg['org']={
             'task':'delete',
@@ -27,8 +32,7 @@ def org():
         }
     return mqtt.request(json.dumps(msg),topic)
 
-
-@db.route("/bucket",methods=['GET','POST','DELETE'])
+@db.route("/bucket",methods=['GET','POST','DELETE', 'PUT'])
 def bucket():
     topic = "uimanager/influxdb"
     msg={}
@@ -47,27 +51,18 @@ def bucket():
             'task':'delete',
             'i':request.json['id']
         }
-    return mqtt.request(json.dumps(msg),topic)
-
-@db.route("/bucket/<which>",methods=['PUT'])
-def bucketPUT(which):
-    topic = "uimanager/influxdb"
-    msg={}
-    if(which=='retentionPeriod'):
+    elif request.method=='PUT':
         msg['bucket']={
             'task':'update',
-            'r':request.json['retentionPeriod'],
-            'i':request.json['id'],
+            'i': request.json['id']
         }
-    elif(which=='name'):
-        msg['bucket']={
-            'task':'update',
-            'n':request.json['name'],
-            'o':request.json['orgID'],
-            'i':request.json['id'],
-        }
+        if 'name' in request.json.keys():
+            msg['bucket']['n']=request.json['name']
+        elif 'description' in request.json.keys():
+            msg['bucket']['d']=request.json['description']
+        elif 'retentionPeriod' in request.json.keys():
+            msg['bucket']['r']=request.json['retentionPeriod']
     return mqtt.request(json.dumps(msg),topic)
-
 
 @db.route("/member",methods=['GET','POST','PUT','DELETE'])
 def member():
@@ -91,7 +86,6 @@ def member():
             'i':request.json['i']
         }
     return mqtt.request(json.dumps(msg),topic)
-
 
 @db.route("/user",methods=['GET','POST','PUT','DELETE','PATCH'])
 def user():
