@@ -1,11 +1,11 @@
 # python3.6
-import random, time, json, requests
+import random, time, json, requests, csv
 from paho.mqtt import client as mqtt_client
-
+from contextlib import closing
 
 broker = 'localhost'
 port = 1883
-topic = "uimanager/influxdb/#"
+topic = "uimanager/influxdb"
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 # username = 'emqx'
@@ -31,7 +31,24 @@ def subscribe(client: mqtt_client):
         req=json.loads(msg.payload.decode())
         print(f"Received `{req}` from `{msg.topic}` topic")
         headers = {'Authorization': 'Token token1'}
-        if 'bucket' in req.keys():
+        if 'query' in req.keys():
+            host = 'http://localhost:8086/api/v2/query'
+            headers['Accept']='application/csv'
+            headers['Content-type']='application/vnd.flux'
+            params = (
+                ('bucket', 'drive'),
+                ('org', 'abb'),
+                ('precision', 'ns'),
+            )
+            start=req['query']['start']
+            data = f'from(bucket:"drive")\n|> range(start:{start})\n|> sort(columns: ["_value"])\n|> limit(n: 4)'
+            res=[]
+            with closing(requests.post(url=host, headers=headers, params=params, data=data,stream=True)) as r:
+                f = (line.decode('utf-8') for line in r.iter_lines())
+                reader=csv.DictReader(f)
+                for row in reader:
+                    res.append(row)
+        elif 'bucket' in req.keys():
             host = 'http://localhost:8086/api/v2/buckets/'
             if req['bucket']['task']=='list':
                 r = requests.get(url=host, headers=headers)

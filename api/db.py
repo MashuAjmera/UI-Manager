@@ -117,3 +117,13 @@ def user():
             'n':request.json['n'],
         }
     return mqtt.request(json.dumps(msg),topic)
+
+@db.route("/query",methods=['GET'])
+def query():
+    topic = "uimanager/influxdb"
+    msg={}
+    if request.method=='GET':
+        msg['query']={
+            'start':'-35d6h'
+        }
+    return mqtt.request(json.dumps(msg),topic)
