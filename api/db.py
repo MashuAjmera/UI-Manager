@@ -127,3 +127,37 @@ def query():
             'start':'-35d6h'
         }
     return mqtt.request(json.dumps(msg),topic)
+
+@db.route("/write",methods=['GET'])
+def write():
+    topic = "uimanager/influxdb"
+    msg={}
+    if request.method=='GET':
+        msg['write']={
+            "message" : 
+            {
+                "data" : 
+                {
+                    "paramId" : "01_01",
+                    "status" : 
+                    {
+                        "code" : False,
+                        "message" : "",
+                        "value" : 267,
+                        "valueType" : "int32"
+                    },
+                    "timestamp" : "2021-06-15T13:55:29.994Z",
+                    "unit" : "kW",
+                    "value" : 
+                    {
+                        "value" : 267,
+                        "valueType" : "int32"
+                    }
+                },
+                "serial" : "drivesim-065b6d62-2"
+            },
+            "messageId" : 29737547,
+            "requestId" : 0,
+            "type" : "MONITORING_DATA"
+        }
+    return mqtt.request(json.dumps(msg),topic)

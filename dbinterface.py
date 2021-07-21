@@ -1,5 +1,5 @@
 # python3.6
-import random, time, json, requests, csv
+import random, time, json, requests, csv, datetime
 from paho.mqtt import client as mqtt_client
 from contextlib import closing
 
@@ -31,8 +31,9 @@ def subscribe(client: mqtt_client):
         req=json.loads(msg.payload.decode())
         print(f"Received `{req}` from `{msg.topic}` topic")
         headers = {'Authorization': 'Token token1'}
+        host = 'http://localhost:8086/api/v2/'
         if 'query' in req.keys():
-            host = 'http://localhost:8086/api/v2/query'
+            host=host+'query'
             headers['Accept']='application/csv'
             headers['Content-type']='application/vnd.flux'
             params = (
@@ -48,8 +49,20 @@ def subscribe(client: mqtt_client):
                 reader=csv.DictReader(f)
                 for row in reader:
                     res.append(row)
+        elif 'write' in req.keys():
+            host = host+'write'
+            params = (
+                ('org', 'abb'),
+                ('bucket', 'arive'),
+                ('precision', 's'),
+            )
+            y=req['write']
+            time=datetime.datetime.strptime( y['message']['data']['timestamp'], "%Y-%m-%dT%H:%M:%S.%fZ" )
+            data = f"{y['message']['serial']},paramId={y['message']['data']['paramId']},unit={y['message']['data']['unit']} value={y['message']['data']['status']['value']} {int(datetime.datetime.timestamp(time))}"
+            response=requests.post(url=host, headers=headers, params=params, data=data)
+            res="successful"
         elif 'bucket' in req.keys():
-            host = 'http://localhost:8086/api/v2/buckets/'
+            host = host+'buckets'
             if req['bucket']['task']=='list':
                 r = requests.get(url=host, headers=headers)
                 res=json.loads(r.content)['buckets']
@@ -82,7 +95,7 @@ def subscribe(client: mqtt_client):
                 r = requests.patch(url=host+id, headers=headers,json=payload)
                 res=json.loads(r.content)
         elif 'org' in req.keys():
-            host='http://localhost:8086/api/v2/orgs/'
+            host=host+'orgs'
             if req['org']['task']=='list':
                 r = requests.get(url=host, headers=headers)
                 res=json.loads(r.content)['orgs']
