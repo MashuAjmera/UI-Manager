@@ -5,41 +5,41 @@ import json
 db = Blueprint('db',__name__)
 
 @db.route("/org",methods=['GET','POST','PUT','DELETE'])
-def org():
+def orgs():
     topic = "uimanager/influxdb"
     msg={}
     if request.method=='GET':
-        msg['org']={'task':'list'}
+        msg['orgs']={'task':'list'}
     if request.method=='POST':
-        msg['org']={
+        msg['orgs']={
             'task':'create',
             'n':request.json['name'],
             'd':request.json['description']
         }
     elif request.method=='PUT':
-        msg['org']={
+        msg['orgs']={
             'task':'update',
             'i': request.json['id']
         }
         if 'name' in request.json.keys():
-            msg['org']['name']=request.json['name']
+            msg['orgs']['name']=request.json['name']
         elif 'description' in request.json.keys():
-            msg['org']['description']=request.json['description']
+            msg['orgs']['description']=request.json['description']
     elif request.method=='DELETE':
-        msg['org']={
+        msg['orgs']={
             'task':'delete',
             'i':request.json['id']
         }
     return mqtt.request(json.dumps(msg),topic)
 
 @db.route("/bucket",methods=['GET','POST','DELETE', 'PUT'])
-def bucket():
+def buckets():
     topic = "uimanager/influxdb"
     msg={}
     if request.method=='GET':
-        msg['bucket']={'task':'list'}
+        msg['buckets']={'task':'list'}
     elif request.method=='POST':
-        msg['bucket']={
+        msg['buckets']={
             'task':'create',
             'n':request.json['name'],
             'o':request.json['organization'],
@@ -47,21 +47,21 @@ def bucket():
             'd':request.json['description'],
         }
     elif request.method=='DELETE':
-        msg['bucket']={
+        msg['buckets']={
             'task':'delete',
             'i':request.json['id']
         }
     elif request.method=='PUT':
-        msg['bucket']={
+        msg['buckets']={
             'task':'update',
             'i': request.json['id']
         }
         if 'name' in request.json.keys():
-            msg['bucket']['n']=request.json['name']
+            msg['buckets']['n']=request.json['name']
         elif 'description' in request.json.keys():
-            msg['bucket']['d']=request.json['description']
+            msg['buckets']['d']=request.json['description']
         elif 'retentionPeriod' in request.json.keys():
-            msg['bucket']['r']=request.json['retentionPeriod']
+            msg['buckets']['r']=request.json['retentionPeriod']
     return mqtt.request(json.dumps(msg),topic)
 
 @db.route("/member",methods=['GET','POST','PUT','DELETE'])
@@ -69,7 +69,7 @@ def member():
     topic = "uimanager/influxdb"
     msg={}
     if request.method=='GET':
-        msg['bucket']={
+        msg['member']={
             'task':'list',
             'n':request.json['name']
         }
@@ -124,7 +124,9 @@ def query():
     msg={}
     if request.method=='GET':
         msg['query']={
-            'start':'-35d6h'
+            'start':'-40d6h',
+            'bucket':'drive',
+            'org':'abb'
         }
     return mqtt.request(json.dumps(msg),topic)
 
