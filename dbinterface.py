@@ -1,10 +1,11 @@
-import random, time, json, requests, csv, datetime
-from paho.mqtt import client as mqtt_client
+import random, time, json, requests, csv, datetime, threading
+import paho.mqtt.client as mqtt_client
 from contextlib import closing
 
 broker = 'localhost'
 port = 1883
 topic = "uimanager/influxdb"
+topic2 = "send/test"
 headers = {'Authorization': 'Token token1'}
 
 def query(host,req):
@@ -127,8 +128,22 @@ def user(host,req):
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
+        client.subscribe(topic)
+        client.subscribe(topic2)
     else:
         print("Failed to connect, return code %d", rc)
+
+def run(stop,repeat):
+    while stop():
+        print('query result...',repeat)
+        time.sleep(repeat)
+
+stop_threads = None
+t1 = None
+
+def newThread(repeat):
+    global stop_threads
+    return threading.Thread(target = run, args =(lambda : stop_threads,repeat))
 
 def on_message(client, userdata, msg):
     req=json.loads(msg.payload.decode())
@@ -142,9 +157,25 @@ def on_message(client, userdata, msg):
         'member': lambda: member(host, req['member']),
         'user': lambda: user(host, req['user']),
     }
-    for key in req.keys():
-        res= switcher.get(key, lambda: "Empty Assignment.")()
-        client.publish(f"response/{msg.topic}",json.dumps(res))
+    if msg.topic==topic:
+        for key in req.keys():
+            res= switcher.get(key, lambda: "Empty Assignment.")()
+            client.publish(f"response/{msg.topic}",json.dumps(res))
+    elif msg.topic==topic2:
+        if 'query' in req.keys():
+            global stop_threads
+            if req['query']['task']=='start':
+                stop_threads = True
+                global t1
+                t1 = newThread(req['query']['num'])
+                t1.start()
+            elif req['query']['task']=='stop':
+                print('query stopped')
+                stop_threads = False
+                t1.join()
+        elif 'write' in req.keys():
+            print('write')
+            # write(host+'write', req['write']['message'])
 
 if __name__ == '__main__':
     # generate client ID with pub prefix randomly
